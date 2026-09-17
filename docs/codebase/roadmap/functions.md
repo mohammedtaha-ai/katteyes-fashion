@@ -60,8 +60,11 @@ _(populated by Phase 7.6)_
 
 ## Cross-cutting
 
-### Docker services (compose)
-_(populated by Phase 1.2)_
+### Docker services (`docker-compose.yml`)
+- `mysql:8.4` → port 3306, healthcheck on `mysqladmin ping`, persistent volume `katteyes_db_data`, init SQL from `./docker/mysql-init/`
+- `mailpit` (axllent/mailpit:latest) → SMTP 1025 + web UI 8025
+- `phpmyadmin` → web UI on 8080, depends on mysql healthy
+- _(api + web services added in Phase 1.3/1.4)_
 
 ### Routes summary (`api/routes/api.php`)
 _(populated as routes are wired in Phases 2–6)_

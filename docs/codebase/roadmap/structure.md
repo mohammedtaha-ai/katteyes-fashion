@@ -11,7 +11,8 @@ katteyes-fashion/                    (repo root)
 │   ├── api.Dockerfile
 │   ├── web.Dockerfile.dev
 │   └── mysql-init/
-├── docker-compose.yml                mysql + api + web + mailpit + phpmyadmin
+│       └── 01-init.sql               utf8mb4 collation
+├── docker-compose.yml                mysql + mailpit + phpmyadmin (api/web come in 1.3/1.4)
 ├── scripts/                          bootstrap, test, deploy (Phase 9)
 ├── docs/
 │   ├── api-contract.md               (Phase 9)
