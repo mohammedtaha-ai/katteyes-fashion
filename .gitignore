@@ -1,0 +1,57 @@
+# OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Env files (NEVER commit secrets)
+.env
+.env.local
+**/.env
+**/.env.local
+
+# Node
+node_modules/
+.pnp.*
+.npm/
+dist/
+.cache/
+.parcel-cache/
+*.tsbuildinfo
+.pnp.js
+
+# PHP / Laravel
+/vendor/
+/api/storage/*.key
+/api/storage/framework/cache/data/
+/api/storage/framework/sessions/
+/api/storage/framework/views/
+/api/storage/logs/
+/api/bootstrap/cache/
+/api/public/build/
+
+# Docker
+docker-compose.override.yml
+.docker/
+
+# Backups
+*.sql.gz
+backups/
+
+# Local backups of source files (legacy static-site was saved as .bak)
+*.bak
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Test artefacts
+coverage/
+.nyc_output/
+
+# Misc
+*.swp
+*~
+.DS_Store
