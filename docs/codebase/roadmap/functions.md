@@ -10,6 +10,15 @@
 ### Auth
 - `User::create(array)` → `api/app/Models/User.php:13` (Laravel default; HasApiTokens trait added in Task 2.3)
 - `User::role` column `enum('admin','customer') default 'customer'` → `api/database/migrations/0001_01_01_000000_create_users_table.php:20`
+- `AuthController::register(RegisterRequest)` → `api/app/Http/Controllers/Api/V1/AuthController.php:18`
+- `AuthController::login(LoginRequest)` → `api/app/Http/Controllers/Api/V1/AuthController.php:31`
+- `AuthController::logout(Request)` → `api/app/Http/Controllers/Api/V1/AuthController.php:42`
+- `AuthController::logoutAll(Request)` → `api/app/Http/Controllers/Api/V1/AuthController.php:47`
+- `AuthController::me(Request)` → `api/app/Http/Controllers/Api/V1/AuthController.php:52`
+- `RegisterRequest::rules()` → email unique + password (Password::min(8))
+- `LoginRequest::rules()` → email + password required
+- `UserResource::toArray()` → id, name, email, role
+- `RateLimiter::for('auth')` → 60 req/min per IP (spec §5.8)
 - `EnsureRole` middleware guards admin-only routes (registered in Phase 2.4 / 3.2)
 
 ### Categories (public + admin)
