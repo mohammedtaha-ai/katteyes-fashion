@@ -10,6 +10,7 @@
 ### Auth
 - `User::create(array)` → `api/app/Models/User.php:13` (Laravel default; HasApiTokens trait added in Task 2.3)
 - `User::role` column `enum('admin','customer') default 'customer'` → `api/database/migrations/0001_01_01_000000_create_users_table.php:20`
+- `EnsureRole` middleware guards admin-only routes (registered in Phase 2.4 / 3.2)
 
 ### Categories (public + admin)
 _(populated by Phase 3)_
@@ -24,7 +25,10 @@ _(populated by Phase 6)_
 _(populated by Phase 5)_
 
 ### Middleware
-_(populated by Phase 2)_
+- `EnsureRole::handle(Request, Closure, string ...$roles)` → `api/app/Http/Middleware/EnsureRole.php:11`
+  - Alias: `role` (registered in `api/bootstrap/app.php`)
+  - Returns 403 with message "ممنوع" if user.role not in roles list
+  - Tests: `api/tests/Feature/Auth/EnsureRoleTest.php` (3 cases: admin allow, customer forbid, unauthenticated forbid)
 
 ### Scheduled (artisan commands)
 _(populated by Phase 9.7)_
