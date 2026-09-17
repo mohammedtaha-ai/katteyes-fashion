@@ -42,6 +42,10 @@ docker compose exec api php artisan migrate:fresh --seed           # DESTRUCTIVE
 docker compose exec api php artisan db:seed --class=CategorySeeder  # one seeder
 docker compose exec api php artisan storage:link
 
+# Config (publish once, edit, then clear cache)
+docker compose exec api php artisan config:publish cors           # publish cors.php to api/config/
+docker compose exec api php artisan config:clear                  # drop the cached config after edits
+
 # Custom artisan commands (Phase 9.7)
 docker compose exec api php artisan products:prune-images
 docker compose exec api php artisan products:prune-images --delete
