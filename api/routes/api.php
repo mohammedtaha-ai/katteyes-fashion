@@ -20,3 +20,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('auth/logout',     [AuthController::class, 'logout']);
     Route::post('auth/logout-all', [AuthController::class, 'logoutAll']);
 });
+
+// admin-only (spec §5.6)
+Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->group(function () {
+    Route::apiResource('categories', \App\Http\Controllers\Api\V1\Admin\CategoryController::class)
+         ->except(['create', 'edit']);
+    Route::post('categories/{id}/restore',  [\App\Http\Controllers\Api\V1\Admin\CategoryController::class, 'restore']);
+    Route::delete('categories/{id}/force', [\App\Http\Controllers\Api\V1\Admin\CategoryController::class, 'forceDestroy']);
+});
