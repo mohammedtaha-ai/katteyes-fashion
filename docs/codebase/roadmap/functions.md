@@ -8,7 +8,8 @@
 ## api/ — Backend
 
 ### Auth
-_(populated by Phase 2)_
+- `User::create(array)` → `api/app/Models/User.php:13` (Laravel default; HasApiTokens trait added in Task 2.3)
+- `User::role` column `enum('admin','customer') default 'customer'` → `api/database/migrations/0001_01_01_000000_create_users_table.php:20`
 
 ### Categories (public + admin)
 _(populated by Phase 3)_
