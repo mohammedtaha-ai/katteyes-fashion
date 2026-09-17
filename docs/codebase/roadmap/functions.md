@@ -20,6 +20,11 @@
 - `UserResource::toArray()` → id, name, email, role
 - `RateLimiter::for('auth')` → 60 req/min per IP (spec §5.8)
 - `EnsureRole` middleware guards admin-only routes (registered in Phase 2.4 / 3.2)
+- `AdminSeeder::run()` → `api/database/seeders/AdminSeeder.php:11`
+  - Reads ADMIN_EMAIL/ADMIN_NAME/ADMIN_PASSWORD from env
+  - Creates user with role='admin' (uses firstOrNew + direct assignment to bypass Fillable)
+  - Idempotent (safe to run multiple times)
+- `DatabaseSeeder::run()` → calls `AdminSeeder::class` only (more seeders added in Phases 3 & 9)
 
 ### Categories (public + admin)
 _(populated by Phase 3)_
