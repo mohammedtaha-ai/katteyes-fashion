@@ -32,6 +32,15 @@
 - `CategoryFactory::definition()` → `api/database/factories/CategoryFactory.php:11`
 - Migration: `categories` table with `id, name, slug unique, is_active bool default true, sort_order int default 0, timestamps, deleted_at`
 - `categories` admin endpoints (Task 3.2)
+  - `CategoryController::index(Request)` → `api/app/Http/Controllers/Api/V1/Admin/CategoryController.php:13` (with `?with_trashed=1`)
+  - `CategoryController::store(CategoryUpsertRequest)` → line 22
+  - `CategoryController::show($id)` → line 27
+  - `CategoryController::update(CategoryUpsertRequest, $id)` → line 32
+  - `CategoryController::destroy($id)` → soft delete
+  - `CategoryController::restore($id)` → restore soft-deleted
+  - `CategoryController::forceDestroy($id)` → hard delete (works on active or soft-deleted)
+  - `CategoryUpsertRequest::rules()` → name required, slug required on create / optional on update, unique (excludes current id)
+  - `CategoryResource::toArray()` → id, name, slug, is_active, sort_order, products_count (when loaded)
 - `GET /api/v1/categories` public endpoint (Task 3.3)
 - `CategorySeeder` (Task 3.4) seeds 6 default categories: الكل, نساء, رجال, أطفال, عبايات, فساتين
 
