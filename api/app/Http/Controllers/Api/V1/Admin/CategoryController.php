@@ -22,7 +22,7 @@ class CategoryController extends Controller
 
     public function store(CategoryUpsertRequest $r)
     {
-        $cat = Category::create($r->validated());
+        $cat = Category::create($r->validated())->fresh();
         return (new CategoryResource($cat))->response()->setStatusCode(201);
     }
 
