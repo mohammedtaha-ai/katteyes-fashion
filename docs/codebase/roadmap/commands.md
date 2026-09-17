@@ -25,6 +25,7 @@ docker compose stop web
 
 # Rebuild after Dockerfile change
 docker compose build --no-cache api
+bash scripts/smoke.sh                         # verify all 5 services reachable
 ```
 
 ## Backend (`api/` inside container)
