@@ -55,3 +55,4 @@ coverage/
 *.swp
 *~
 .DS_Store
+api/katteyes
