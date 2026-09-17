@@ -27,7 +27,13 @@
 - `DatabaseSeeder::run()` → calls `AdminSeeder::class` only (more seeders added in Phases 3 & 9)
 
 ### Categories (public + admin)
-_(populated by Phase 3)_
+- `Category::products()` → returns `hasMany(Product::class)` relation (Product model added in Phase 4)
+- `Category` uses `SoftDeletes` trait; `find()` excludes soft-deleted, `withTrashed()` includes
+- `CategoryFactory::definition()` → `api/database/factories/CategoryFactory.php:11`
+- Migration: `categories` table with `id, name, slug unique, is_active bool default true, sort_order int default 0, timestamps, deleted_at`
+- `categories` admin endpoints (Task 3.2)
+- `GET /api/v1/categories` public endpoint (Task 3.3)
+- `CategorySeeder` (Task 3.4) seeds 6 default categories: الكل, نساء, رجال, أطفال, عبايات, فساتين
 
 ### Products (public list/detail + admin CRUD + images)
 _(populated by Phase 4–5)_
