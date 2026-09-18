@@ -50,7 +50,13 @@
 - `DatabaseSeeder::run()` → calls `AdminSeeder` only. Categories (and all future entities) are added by the admin via the dashboard. No default seeders.
 
 ### Products (public list/detail + admin CRUD + images)
-_(populated by Phase 4–5)_
+- `Product::category()` → `belongsTo(Category::class)` (Phase 4.1)
+- `Product::images()` → `hasMany(ProductImage::class)` (Phase 5)
+- `Product::options()` → `hasMany(ProductOption::class)` (Phase 4.6)
+- `Product::orderItems()` → `hasMany(OrderItem::class)` (Phase 6)
+- `Product::getDiskAttribute()` → returns `config('filesystems.default')` (used by `ProductImageResource` in Phase 5 to build full URLs)
+- `ProductFactory::definition()` → `api/database/factories/ProductFactory.php:11`
+- `products` table: id, name 150, slug 180 unique, description text, price decimal(10,2), currency varchar(3) default 'YER', category_id FK restrictOnDelete, is_active bool, timestamps, deleted_at; INDEX (category_id, is_active)
 
 ### Orders (create + retrieve + admin + customer my-orders)
 _(populated by Phase 6)_
