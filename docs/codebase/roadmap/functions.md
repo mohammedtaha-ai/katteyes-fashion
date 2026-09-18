@@ -47,7 +47,10 @@
     - Ordered by `sort_order ASC, id ASC`
     - No auth required (public storefront endpoint, spec §5.3)
   - Route: `api/routes/api.php` — public section, no middleware beyond the `api/v1` prefix from `bootstrap/app.php` (`apiPrefix: 'api/v1'`)
-- `CategorySeeder` (Task 3.4) seeds 6 default categories: الكل, نساء, رجال, أطفال, عبايات, فساتين
+- `CategorySeeder::run()` → `api/database/seeders/CategorySeeder.php:11`
+  - Uses `updateOrCreate` keyed by `slug` — idempotent + handles leftover categories
+  - Seeds: الكل, نساء, رجال, أطفال, عبايات, فساتين (sort_order 0..5)
+- `DatabaseSeeder::run()` → calls `AdminSeeder` + `CategorySeeder` (more seeders added in later phases)
 
 ### Products (public list/detail + admin CRUD + images)
 _(populated by Phase 4–5)_
