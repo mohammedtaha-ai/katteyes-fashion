@@ -42,6 +42,11 @@
   - `CategoryUpsertRequest::rules()` → name required, slug required on create / optional on update, unique (excludes current id)
   - `CategoryResource::toArray()` → id, name, slug, is_active, sort_order, products_count (when loaded)
 - `GET /api/v1/categories` public endpoint (Task 3.3)
+  - `CategoryController::index()` (public) → `api/app/Http/Controllers/Api/V1/CategoryController.php:11`
+    - Returns only `is_active=true` and not soft-deleted categories
+    - Ordered by `sort_order ASC, id ASC`
+    - No auth required (public storefront endpoint, spec §5.3)
+  - Route: `api/routes/api.php` — public section, no middleware beyond the `api/v1` prefix from `bootstrap/app.php` (`apiPrefix: 'api/v1'`)
 - `CategorySeeder` (Task 3.4) seeds 6 default categories: الكل, نساء, رجال, أطفال, عبايات, فساتين
 
 ### Products (public list/detail + admin CRUD + images)
