@@ -24,7 +24,7 @@
   - Reads ADMIN_EMAIL/ADMIN_NAME/ADMIN_PASSWORD from env
   - Creates user with role='admin' (uses firstOrNew + direct assignment to bypass Fillable)
   - Idempotent (safe to run multiple times)
-- `DatabaseSeeder::run()` → calls `AdminSeeder::class` only (more seeders added in Phases 3 & 9)
+- `DatabaseSeeder::run()` → calls `AdminSeeder::class` only (categories are NOT seeded; admin adds them via dashboard — see Task 3.4 reversal)
 
 ### Categories (public + admin)
 - `Category::products()` → returns `hasMany(Product::class)` relation (Product model added in Phase 4)
@@ -47,10 +47,7 @@
     - Ordered by `sort_order ASC, id ASC`
     - No auth required (public storefront endpoint, spec §5.3)
   - Route: `api/routes/api.php` — public section, no middleware beyond the `api/v1` prefix from `bootstrap/app.php` (`apiPrefix: 'api/v1'`)
-- `CategorySeeder::run()` → `api/database/seeders/CategorySeeder.php:11`
-  - Uses `updateOrCreate` keyed by `slug` — idempotent + handles leftover categories
-  - Seeds: الكل, نساء, رجال, أطفال, عبايات, فساتين (sort_order 0..5)
-- `DatabaseSeeder::run()` → calls `AdminSeeder` + `CategorySeeder` (more seeders added in later phases)
+- `DatabaseSeeder::run()` → calls `AdminSeeder` only. Categories (and all future entities) are added by the admin via the dashboard. No default seeders.
 
 ### Products (public list/detail + admin CRUD + images)
 _(populated by Phase 4–5)_
