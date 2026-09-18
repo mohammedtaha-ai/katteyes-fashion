@@ -14,6 +14,9 @@ Route::middleware('throttle:auth')->group(function () {
     Route::post('auth/login',    [AuthController::class, 'login']);
 });
 
+// public storefront (no auth, spec §5.3)
+Route::get('categories', [\App\Http\Controllers\Api\V1\CategoryController::class, 'index']);
+
 // auth-protected
 Route::middleware('auth:sanctum')->group(function () {
     Route::get ('auth/me',         [AuthController::class, 'me']);
