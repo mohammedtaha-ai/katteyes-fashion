@@ -28,4 +28,15 @@ class ProductController extends Controller
 
         return ProductResource::collection($q->paginate(12));
     }
+
+    public function show(string $slug)
+    {
+        // NOTE: `images` and `options` eager-loads deferred to Task 4.6 —
+        // those tables don't exist yet (would throw SQLSTATE in tests).
+        $p = Product::where('slug', $slug)
+            ->where('is_active', true)
+            ->with('category')
+            ->firstOrFail();
+        return ['data' => new ProductResource($p)];
+    }
 }
