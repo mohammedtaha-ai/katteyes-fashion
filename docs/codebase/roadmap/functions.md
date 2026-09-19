@@ -57,6 +57,11 @@
 - `Product::getDiskAttribute()` → returns `config('filesystems.default')` (used by `ProductImageResource` in Phase 5 to build full URLs)
 - `ProductFactory::definition()` → `api/database/factories/ProductFactory.php:11`
 - `products` table: id, name 150, slug 180 unique, description text, price decimal(10,2), currency varchar(3) default 'YER', category_id FK restrictOnDelete, is_active bool, timestamps, deleted_at; INDEX (category_id, is_active)
+- `ProductResource::toArray()` → `api/app/Http/Resources/ProductResource.php:13`
+  - Fields: id, name, slug, description, price (float), currency, category (whenLoaded), is_active (bool), images (whenLoaded via callback form), colors[] (whenLoaded), sizes[] (whenLoaded)
+  - `category`, `images`, `colors`, `sizes` only present when their relations are eager-loaded (N+1 prevention). Uses callback form for `whenLoaded()` to avoid `MissingValue`-is-truthy bug triggering spurious queries.
+- `ProductImageResource::toArray()` (STUB) → `api/app/Http/Resources/ProductImageResource.php:8` — replaced properly in Task 5.2 (with full URL via `Storage::disk->url()`)
+- `ProductImage` model (STUB) → `api/app/Models/ProductImage.php:11` — `belongsTo(Product)` + `path`/`sort_order` fillable; fleshed out in Phase 5 with table migration + `ProductImageFactory`
 
 ### Orders (create + retrieve + admin + customer my-orders)
 _(populated by Phase 6)_
