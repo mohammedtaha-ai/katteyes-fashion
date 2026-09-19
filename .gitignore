@@ -56,3 +56,6 @@ coverage/
 *~
 .DS_Store
 api/katteyes
+
+# Local SDD workspace (subagent ledger, briefs, reports)
+.superpowers/
