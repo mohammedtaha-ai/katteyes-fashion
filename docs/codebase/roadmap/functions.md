@@ -90,7 +90,21 @@
 _(populated by Phase 6)_
 
 ### Image Upload Pipeline
-_(populated by Phase 5)_
+- `ProductImage` model → `api/app/Models/ProductImage.php:11`
+  - Fillable: product_id, path, sort_order
+  - Casts: sort_order → int
+  - Relation: `belongsTo(Product::class)`
+  - `product_images` table: id, product_id FK cascadeOnDelete, path 255, sort_order int default 0, timestamps; INDEX (product_id, sort_order)
+- `ProductImageFactory::definition()` → `api/database/factories/ProductImageFactory.php:11`
+  - Path: `placeholders/{uuid}.png` (placeholder for tests)
+- `ProductOption` model → `api/app/Models/ProductOption.php:11`
+  - Fillable: product_id, type, value, sort_order
+  - Casts: sort_order → int
+  - Relation: `belongsTo(Product::class)`
+  - `product_options` table: id, product_id FK cascadeOnDelete, type enum('color','size'), value 50, sort_order int default 0, timestamps; INDEX (product_id, type, sort_order); UNIQUE (product_id, type, value)
+- `ProductOptionFactory::definition()` → `api/database/factories/ProductOptionFactory.php:11`
+  - Type: random color/size
+  - Value: random word
 
 ### Middleware
 - `EnsureRole::handle(Request, Closure, string ...$roles)` → `api/app/Http/Middleware/EnsureRole.php:11`
