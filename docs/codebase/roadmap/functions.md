@@ -76,6 +76,15 @@
   - Returns 404 (`firstOrFail()`) if not found or soft-deleted or inactive
   - No auth required (public storefront endpoint, spec §5.3)
 - `GET /api/v1/products/{slug}` → public route in `routes/api.php` (added in Task 4.4)
+- `ProductController::index(Request)` (admin) → `api/app/Http/Controllers/Api/V1/Admin/ProductController.php:13` (with `?status=active|inactive`, `?category=slug`, `?q=`)
+- `ProductController::store(ProductUpsertRequest)` → line 28 (validates name/slug unique + currency 3-char + category exists; `->fresh()` after create for DB defaults)
+- `ProductController::show($product)` → line 33 (withTrashed)
+- `ProductController::update(ProductUpsertRequest, $product)` → line 38 (withTrashed)
+- `ProductController::destroy($product)` → soft delete
+- `ProductController::restore($product)` → restore soft-deleted
+- `ProductController::forceDestroy($product)` → hard delete (uses withTrashed so it works on restored rows too)
+- `ProductUpsertRequest::rules()` → name required, slug required unique (excludes current id via route('product')), currency size:3, category_id exists, is_active boolean
+- `GET|HEAD /api/v1/admin/products`, `POST /api/v1/admin/products`, `GET|HEAD /api/v1/admin/products/{product}`, `PUT|PATCH /api/v1/admin/products/{product}`, `DELETE /api/v1/admin/products/{product}`, `POST /api/v1/admin/products/{product}/restore`, `DELETE /api/v1/admin/products/{product}/force` → all under `auth:sanctum + role:admin` middleware group in `api/routes/api.php` (Task 4.5)
 
 ### Orders (create + retrieve + admin + customer my-orders)
 _(populated by Phase 6)_
