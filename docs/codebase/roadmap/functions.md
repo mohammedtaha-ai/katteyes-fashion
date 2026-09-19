@@ -62,6 +62,15 @@
   - `category`, `images`, `colors`, `sizes` only present when their relations are eager-loaded (N+1 prevention). Uses callback form for `whenLoaded()` to avoid `MissingValue`-is-truthy bug triggering spurious queries.
 - `ProductImageResource::toArray()` (STUB) → `api/app/Http/Resources/ProductImageResource.php:8` — replaced properly in Task 5.2 (with full URL via `Storage::disk->url()`)
 - `ProductImage` model (STUB) → `api/app/Models/ProductImage.php:11` — `belongsTo(Product)` + `path`/`sort_order` fillable; fleshed out in Phase 5 with table migration + `ProductImageFactory`
+- `ProductController::index(Request)` (public) → `api/app/Http/Controllers/Api/V1/ProductController.php:11`
+  - Filters: `is_active=true`, not soft-deleted (default scope)
+  - Optional `?category={slug}` filter via `whereHas` on Category.slug (Category must also be `is_active=true`)
+  - Optional `?q={query}` searches `name LIKE %q%` OR `description LIKE %q%`
+  - Eager-loads `category` to avoid N+1
+  - Paginated 12 per page
+  - No auth required (public storefront endpoint, spec §5.3)
+- `GET /api/v1/products` → public route in `routes/api.php` (added in Task 4.3)
+- `ProductController::show(string $slug)` (public) → added in Task 4.4 with eager-loaded `category`, `images`, `options`
 
 ### Orders (create + retrieve + admin + customer my-orders)
 _(populated by Phase 6)_
