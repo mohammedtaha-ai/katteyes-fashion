@@ -72,10 +72,17 @@
 - `GET /api/v1/products` → public route in `routes/api.php` (added in Task 4.3)
 - `ProductController::show(string $slug)` (public) → `api/app/Http/Controllers/Api/V1/ProductController.php:33`
   - Lookup by `slug` (not ID), only `is_active=true` + not soft-deleted
-  - Eager-loads `category` (images/options eager-load deferred to Task 4.6 — those tables don't exist yet)
+  - Eager-loads `category`, `images`, `options` (tables created in Task 4.6)
   - Returns 404 (`firstOrFail()`) if not found or soft-deleted or inactive
   - No auth required (public storefront endpoint, spec §5.3)
 - `GET /api/v1/products/{slug}` → public route in `routes/api.php` (added in Task 4.4)
+- `UploadImageAction::handle(array $files, string $disk = null): string[]` → `api/app/Actions/UploadImageAction.php:15`
+  - Returns disk-relative paths (e.g. `products/2026/09/{uuid}.webp`)
+  - Resizes to max width 1600px (preserves aspect ratio)
+  - Encodes as WebP quality 85 (spec §7.2)
+  - Stores via `Storage::disk($disk)` (defaults to `config('filesystems.default')`)
+  - Files organized in `products/{YYYY}/{MM}/` folders
+  - Uses Intervention Image v4 (`decode()` for input, `encodeUsingFileExtension()` for output)
 - `ProductController::index(Request)` (admin) → `api/app/Http/Controllers/Api/V1/Admin/ProductController.php:13` (with `?status=active|inactive`, `?category=slug`, `?q=`)
 - `ProductController::store(ProductUpsertRequest)` → line 28 (validates name/slug unique + currency 3-char + category exists; `->fresh()` after create for DB defaults)
 - `ProductController::show($product)` → line 33 (withTrashed)
