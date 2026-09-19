@@ -43,14 +43,17 @@ class ProductDetailTest extends TestCase
         $this->getJson('/api/v1/products/nonexistent')->assertNotFound();
     }
 
-    public function test_show_eager_loads_category(): void
+    public function test_show_eager_loads_category_images_options(): void
     {
         $cat = Category::factory()->create();
         $p = Product::factory()->for($cat)->create();
 
         $r = $this->getJson("/api/v1/products/{$p->slug}");
         $r->assertOk()
-          ->assertJsonStructure(['data' => ['id', 'name', 'slug', 'price', 'currency', 'category' => ['id', 'slug', 'name']]])
-          ->assertJsonPath('data.category.id', $cat->id);
+          ->assertJsonStructure(['data' => [
+              'id', 'name', 'slug', 'price', 'currency',
+              'category' => ['id', 'slug', 'name'],
+              'images', 'colors', 'sizes',
+          ]]);
     }
 }

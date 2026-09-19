@@ -31,11 +31,9 @@ class ProductController extends Controller
 
     public function show(string $slug)
     {
-        // NOTE: `images` and `options` eager-loads deferred to Task 4.6 —
-        // those tables don't exist yet (would throw SQLSTATE in tests).
         $p = Product::where('slug', $slug)
             ->where('is_active', true)
-            ->with('category')
+            ->with(['category', 'images', 'options'])
             ->firstOrFail();
         return ['data' => new ProductResource($p)];
     }
