@@ -70,7 +70,12 @@
   - Paginated 12 per page
   - No auth required (public storefront endpoint, spec §5.3)
 - `GET /api/v1/products` → public route in `routes/api.php` (added in Task 4.3)
-- `ProductController::show(string $slug)` (public) → added in Task 4.4 with eager-loaded `category`, `images`, `options`
+- `ProductController::show(string $slug)` (public) → `api/app/Http/Controllers/Api/V1/ProductController.php:33`
+  - Lookup by `slug` (not ID), only `is_active=true` + not soft-deleted
+  - Eager-loads `category` (images/options eager-load deferred to Task 4.6 — those tables don't exist yet)
+  - Returns 404 (`firstOrFail()`) if not found or soft-deleted or inactive
+  - No auth required (public storefront endpoint, spec §5.3)
+- `GET /api/v1/products/{slug}` → public route in `routes/api.php` (added in Task 4.4)
 
 ### Orders (create + retrieve + admin + customer my-orders)
 _(populated by Phase 6)_
