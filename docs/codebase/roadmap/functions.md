@@ -139,8 +139,18 @@
   - If guest: `?email=` query param must match `order.customer_email` else 404
   - Returns `OrderResource` with eager-loaded items
 - `GET /api/v1/orders/{order_number}` → public route in `routes/api.php` (auth check happens inside controller; no middleware on the route itself)
-- `GET /api/v1/admin/orders` → admin list (Task 6.7)
-- `GET /api/v1/my/orders` → customer orders list (Task 6.7)
+- `Admin\OrderController::index(Request)` → `api/app/Http/Controllers/Api/V1/Admin/OrderController.php:13` (with `?status=`, `?from=`, `?to=` filters)
+- `Admin\OrderController::show(string $order_number)` → line 26
+- `Admin\OrderController::update(Request, string $order_number)` → line 31 (validates status enum transition)
+- `Admin\OrderController::destroy(string $order_number)` → line 38 (hard delete)
+- `MyOrdersController::index(Request)` → `api/app/Http/Controllers/Api/V1/MyOrdersController.php:11` (scoped to `user.orders`)
+- `MyOrdersController::show(Request, string $order_number)` → line 17
+- `GET /api/v1/admin/orders` → admin list
+- `GET /api/v1/admin/orders/{order_number}` → admin detail
+- `PATCH /api/v1/admin/orders/{order_number}` → admin update status
+- `DELETE /api/v1/admin/orders/{order_number}` → admin hard delete
+- `GET /api/v1/my/orders` → customer orders list (auth-protected)
+- `GET /api/v1/my/orders/{order_number}` → customer own order detail
 - `OrderNumberGenerator::generate(?int $year = null): string` → `api/app/Services/OrderNumberGenerator.php:11`
   - Format: `ORD-{YYYY}-{NNNNNN}` (zero-padded per-year sequence)
   - Queries DB for max existing order_number for the year + 1
