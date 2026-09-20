@@ -19,6 +19,7 @@ Route::get('categories', [\App\Http\Controllers\Api\V1\CategoryController::class
 Route::get('products',   [\App\Http\Controllers\Api\V1\ProductController::class, 'index']);
 Route::get('products/{slug}', [\App\Http\Controllers\Api\V1\ProductController::class, 'show']);
 Route::post('orders', [\App\Http\Controllers\Api\V1\OrderController::class, 'store']);
+Route::get('orders/{order_number}', [\App\Http\Controllers\Api\V1\OrderController::class, 'show']);
 
 // auth-protected
 Route::middleware('auth:sanctum')->group(function () {
