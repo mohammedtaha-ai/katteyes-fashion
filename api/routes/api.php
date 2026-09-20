@@ -18,6 +18,7 @@ Route::middleware('throttle:auth')->group(function () {
 Route::get('categories', [\App\Http\Controllers\Api\V1\CategoryController::class, 'index']);
 Route::get('products',   [\App\Http\Controllers\Api\V1\ProductController::class, 'index']);
 Route::get('products/{slug}', [\App\Http\Controllers\Api\V1\ProductController::class, 'show']);
+Route::post('orders', [\App\Http\Controllers\Api\V1\OrderController::class, 'store']);
 
 // auth-protected
 Route::middleware('auth:sanctum')->group(function () {
