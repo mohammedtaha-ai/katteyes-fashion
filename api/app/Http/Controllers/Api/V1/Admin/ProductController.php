@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\ProductUpsertRequest;
+use App\Http\Resources\ProductImageResource;
 use App\Http\Resources\ProductResource;
 use App\Models\Product;
 use App\Actions\UploadImageAction;
@@ -89,6 +90,60 @@ class ProductController extends Controller
     public function forceDestroy($product)
     {
         Product::withTrashed()->findOrFail($product)->forceDelete();
+        return response()->json(null, 204);
+    }
+
+    public function appendImages(Request $r, UploadImageAction $action, $product)
+    {
+        $r->validate([
+            'images' => 'required|array|min:1|max:20',
+            'images.*' => 'file|image|mimes:jpeg,jpg,png,webp|max:10240',
+        ]);
+
+        $p = Product::findOrFail($product);
+        $start = $p->images()->max('sort_order') ?? -1;
+
+        $paths = $action->handle($r->file('images'));
+        foreach ($paths as $i => $path) {
+            $p->images()->create(['path' => $path, 'sort_order' => $start + $i + 1]);
+        }
+
+        return ['data' => ProductImageResource::collection($p->fresh()->images()->orderBy('sort_order')->get())];
+    }
+
+    public function deleteImage($product, $image)
+    {
+        $p = Product::findOrFail($product);
+
+        if ($p->images()->count() <= 1) {
+            return response()->json(['message' => 'لا يمكن حذف آخر صورة'], 422);
+        }
+
+        $img = $p->images()->findOrFail($image);
+        Storage::disk(config('filesystems.default'))->delete($img->path);
+        $img->delete();
+
+        return response()->json(null, 204);
+    }
+
+    public function reorderImages(Request $r, $product)
+    {
+        $data = $r->validate(['ids' => 'required|array|min:1']);
+        $p = Product::findOrFail($product);
+
+        $existing = $p->images()->pluck('id')->all();
+        sort($existing);
+        $requested = $data['ids'];
+        sort($requested);
+
+        if ($existing !== $requested) {
+            return response()->json(['message' => 'قائمة IDs غير مكتملة'], 422);
+        }
+
+        foreach ($data['ids'] as $i => $imageId) {
+            $p->images()->where('id', $imageId)->update(['sort_order' => $i]);
+        }
+
         return response()->json(null, 204);
     }
 }

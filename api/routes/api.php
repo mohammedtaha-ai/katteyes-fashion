@@ -37,4 +37,8 @@ Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->group(functi
          ->except(['create', 'edit']);
     Route::post  ('products/{product}/restore', [\App\Http\Controllers\Api\V1\Admin\ProductController::class, 'restore']);
     Route::delete('products/{product}/force',  [\App\Http\Controllers\Api\V1\Admin\ProductController::class, 'forceDestroy']);
+
+    Route::post('products/{product}/images',         [\App\Http\Controllers\Api\V1\Admin\ProductController::class, 'appendImages']);
+    Route::delete('products/{product}/images/{image}', [\App\Http\Controllers\Api\V1\Admin\ProductController::class, 'deleteImage']);
+    Route::post('products/{product}/images/reorder',  [\App\Http\Controllers\Api\V1\Admin\ProductController::class, 'reorderImages']);
 });
