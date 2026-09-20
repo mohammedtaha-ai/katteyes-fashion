@@ -83,6 +83,11 @@
   - Stores via `Storage::disk($disk)` (defaults to `config('filesystems.default')`)
   - Files organized in `products/{YYYY}/{MM}/` folders
   - Uses Intervention Image v4 (`decode()` for input, `encodeUsingFileExtension()` for output)
+- `ProductImageResource::toArray()` → `api/app/Http/Resources/ProductImageResource.php:8`
+  - Fields: id, url (built via `Storage::disk($disk)->url($path)`), sort_order (int)
+  - Uses `Product::disk` accessor (returns `config('filesystems.default')` — Task 4.1)
+  - For local disk: URL is `APP_URL/storage/{path}` (after `php artisan storage:link`)
+  - For S3 disk (future): URL is the S3/CDN URL
 - `ProductController::index(Request)` (admin) → `api/app/Http/Controllers/Api/V1/Admin/ProductController.php:13` (with `?status=active|inactive`, `?category=slug`, `?q=`)
 - `ProductController::store(ProductUpsertRequest)` → line 28 (validates name/slug unique + currency 3-char + category exists; `->fresh()` after create for DB defaults)
 - `ProductController::show($product)` → line 33 (withTrashed)
