@@ -213,12 +213,20 @@ _(populated by Phase 9.7)_
   - Request interceptor: attaches `Bearer <token>` from `useAuthStore`
   - Response interceptor: on 401 → `useAuthStore.clear()` + redirect to `/login` (unless URL contains `/auth/login`)
 - `web/src/api/types.ts` → User, Category, Product, ProductImage, Order, OrderItem TypeScript interfaces
-- `useAuthStore` (PLACEHOLDER, fully implemented in Task 7.3) → `web/src/stores/auth-store.ts:10`
+- `useAuthStore` → `web/src/stores/auth-store.ts` (Task 7.3 — replaces Task 7.2 placeholder)
 - MSW mocks at `web/src/__tests__/mocks/handlers.ts` + `mocks/server.ts`
 - Vitest setup with jsdom + @testing-library/jest-dom at `web/src/__tests__/setup.ts`
 
 ### Stores (Zustand)
-_(populated by Phase 7.3)_
+- `useAuthStore` → `web/src/stores/auth-store.ts` (Task 7.3 — replaces Task 7.2 placeholder)
+  - State: `user: User|null`, `token: string|null`
+  - Methods: `setAuth({token, user})`, `clear()`, `isAdmin()`, `isAuthenticated()`
+  - Persisted to localStorage under `katteyes_auth`
+- `useCartStore` → `web/src/stores/cart-store.ts` (Task 7.3 — full implementation)
+  - State: `items: CartItem[]` where CartItem = {productId, productName, price, currency, img, color, size, quantity}
+  - Methods: `addItem(i)`, `updateQty(idx, delta)`, `removeItem(idx)`, `clear()`, `totalPrice()`, `totalItems()`
+  - Persisted to localStorage under `katteyes_cart`
+  - `addItem` increments quantity for same `productId+color+size`, otherwise adds new line
 
 ### Queries (TanStack)
 _(populated by Phase 7.4)_
