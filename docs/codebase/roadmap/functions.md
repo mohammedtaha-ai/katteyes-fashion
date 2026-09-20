@@ -88,14 +88,22 @@
   - Uses `Product::disk` accessor (returns `config('filesystems.default')` — Task 4.1)
   - For local disk: URL is `APP_URL/storage/{path}` (after `php artisan storage:link`)
   - For S3 disk (future): URL is the S3/CDN URL
-- `ProductController::index(Request)` (admin) → `api/app/Http/Controllers/Api/V1/Admin/ProductController.php:13` (with `?status=active|inactive`, `?category=slug`, `?q=`)
-- `ProductController::store(ProductUpsertRequest)` → line 28 (validates name/slug unique + currency 3-char + category exists; `->fresh()` after create for DB defaults)
-- `ProductController::show($product)` → line 33 (withTrashed)
-- `ProductController::update(ProductUpsertRequest, $product)` → line 38 (withTrashed)
+- `ProductController::index(Request)` (admin) → `api/app/Http/Controllers/Api/V1/Admin/ProductController.php:16` (with `?status=active|inactive`, `?category=slug`, `?q=`)
+- `ProductController::store(ProductUpsertRequest, UploadImageAction)` → `api/app/Http/Controllers/Api/V1/Admin/ProductController.php:32`
+  - Validates text fields + requires `images[]` (min 1, max 20, 10MB each)
+  - Creates product, then uploads images via `UploadImageAction`, persists `ProductImage` rows
+  - Returns 201 with `ProductResource` (eager-loaded images)
+- `ProductController::show($product)` → line 48 (withTrashed)
+- `ProductController::update(ProductUpsertRequest, $product, UploadImageAction)` → line 54
+  - Validates text fields + optional `images[]` (REPLACE mode)
+  - If images provided: deletes old `ProductImage` rows + files, uploads new, creates new rows
+  - If no images: existing images preserved
+  - Returns 200 with `ProductResource`
 - `ProductController::destroy($product)` → soft delete
 - `ProductController::restore($product)` → restore soft-deleted
 - `ProductController::forceDestroy($product)` → hard delete (uses withTrashed so it works on restored rows too)
-- `ProductUpsertRequest::rules()` → name required, slug required unique (excludes current id via route('product')), currency size:3, category_id exists, is_active boolean
+- `ProductUpsertRequest::rules()` → name required, slug required unique (excludes current id via route('product')), currency size:3, category_id exists, is_active boolean, images[] (required on POST, sometimes on PATCH) — each file|image|mimes:jpeg,jpg,png,webp|max:10240
+  - Tests: `api/tests/Feature/Products/AdminProductImagesTest.php` (4 cases: create requires image, create persists ProductImage, update REPLACES images, update without images preserves)
 - `GET|HEAD /api/v1/admin/products`, `POST /api/v1/admin/products`, `GET|HEAD /api/v1/admin/products/{product}`, `PUT|PATCH /api/v1/admin/products/{product}`, `DELETE /api/v1/admin/products/{product}`, `POST /api/v1/admin/products/{product}/restore`, `DELETE /api/v1/admin/products/{product}/force` → all under `auth:sanctum + role:admin` middleware group in `api/routes/api.php` (Task 4.5)
 
 ### Orders (create + retrieve + admin + customer my-orders)
