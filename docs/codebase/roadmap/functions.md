@@ -144,6 +144,15 @@
   - Format: header (order number, customer info) + items list + total
   - Items show: `index. name (color - size) × qty = subtotal currency`
   - Default note when null: `لا يوجد`
+- `CreateOrderAction::execute(array $data, ?Request $request = null): Order` → `api/app/Actions/CreateOrderAction.php:13`
+  - Validates items non-empty (spec §7.4: "لا يمكن إرسال طلب فارغ")
+  - Verifies product exists (spec §7.4: "أحد المنتجات غير متوفر")
+  - Validates color + size against product's options (spec §7.4: "خيار اللون/المقاس غير صالح")
+  - Guest requires customer_email (spec §7.4: "البريد مطلوب للطلبات بدون حساب")
+  - Snapshots product_name + price into order_items
+  - Creates order + items in DB transaction
+- `StoreOrderRequest::rules()` → items array min:1 max:50 + items.* (product_id exists, color+size required string, quantity integer 1-99), customer_name 100, customer_address 1000, customer_notes 1000 nullable, customer_email required if guest
+- `StoreOrderRequest::messages()` → maps validation errors to exact spec §7.4 Arabic strings
 
 ### Image Upload Pipeline
 - `ProductImage` model → `api/app/Models/ProductImage.php:11`
