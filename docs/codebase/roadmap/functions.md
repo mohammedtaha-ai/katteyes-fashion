@@ -216,6 +216,11 @@ _(populated by Phase 9.7)_
 - `useAuthStore` → `web/src/stores/auth-store.ts` (Task 7.3 — replaces Task 7.2 placeholder)
 - MSW mocks at `web/src/__tests__/mocks/handlers.ts` + `mocks/server.ts`
 - Vitest setup with jsdom + @testing-library/jest-dom at `web/src/__tests__/setup.ts`
+- API modules (Task 7.4):
+  - `authApi` → `web/src/api/auth.api.ts` — `login`, `register`, `me`, `logout` (matches `/auth/*` endpoints)
+  - `productsApi` → `web/src/api/products.api.ts` — public `list(params)` (filters out null), `show(slug)`; admin `adminCreate(FormData)`, `adminUpdate(id, FormData)`, `adminDelete(id)`, `adminRestore(id)`, `appendImages(id, FormData)`, `deleteImage(productId, imageId)`, `reorderImages(id, ids)` (matches `/products`, `/products/:slug`, `/admin/products/*`)
+  - `categoriesApi` → `web/src/api/categories.api.ts` — public `list(params)`; admin `adminList`, `adminCreate`, `adminUpdate`, `adminDelete`, `adminRestore` (matches `/categories`, `/admin/categories/*`)
+  - `ordersApi` → `web/src/api/orders.api.ts` — public `create(payload)`, `show(orderNumber, email?)`; customer `myList`, `myShow`; admin `adminList(params)`, `adminShow`, `adminUpdate(orderNumber, {status})`, `adminDelete` (matches `/orders`, `/my/orders`, `/admin/orders/*`)
 
 ### Stores (Zustand)
 - `useAuthStore` → `web/src/stores/auth-store.ts` (Task 7.3 — replaces Task 7.2 placeholder)
@@ -229,7 +234,27 @@ _(populated by Phase 9.7)_
   - `addItem` increments quantity for same `productId+color+size`, otherwise adds new line
 
 ### Queries (TanStack)
-_(populated by Phase 7.4)_
+- `use-auth` → `web/src/queries/use-auth.ts` (Task 7.4)
+  - `useLogin()` — mutation that POSTs `/auth/login`, onSuccess stores token+user via `useAuthStore.setAuth`
+  - `useRegister()` — mutation that POSTs `/auth/register`, onSuccess stores token+user
+  - `useMe(enabled=true)` — GET `/auth/me` (gated by token presence)
+  - `useLogout()` — mutation that POSTs `/auth/logout`, onSuccess clears auth-store + queryCache
+- `use-products` → `web/src/queries/use-products.ts` (Task 7.4)
+  - `useProducts(filters)` — list, queryKey includes filters
+  - `useProduct(slug)` — detail by slug
+  - Admin mutations with cache invalidation: `useCreateProduct`, `useUpdateProduct`, `useDeleteProduct`, `useRestoreProduct`, `useAppendImages`, `useDeleteImage`, `useReorderImages`
+  - Stable `productKeys` for queryKey composition
+- `use-categories` → `web/src/queries/use-categories.ts` (Task 7.4)
+  - `useCategories(withTrashed)` / `useAdminCategories(withTrashed)` — list (public + admin)
+  - Mutations with cache invalidation: `useCreateCategory`, `useUpdateCategory`, `useDeleteCategory`, `useRestoreCategory`
+  - Stable `categoryKeys` for queryKey composition
+- `use-orders` → `web/src/queries/use-orders.ts` (Task 7.4)
+  - `useCreateOrder()` — guest/customer POST `/orders`
+  - `useOrder(orderNumber, email?)` — public GET (with optional email verification query)
+  - `useMyOrders()` / `useMyOrder(orderNumber)` — authenticated customer
+  - Admin: `useAdminOrders(params)`, `useAdminOrder(orderNumber)`, `useUpdateOrderStatus()`, `useDeleteOrder()`
+  - Stable `orderKeys` for queryKey composition
+- Note: hooks expose the raw axios response (`result.data.data` = server payload) since queryFns return `apiClient.*()` directly
 
 ### Auth / Account
 _(populated by Phase 8.5–8.6)_
