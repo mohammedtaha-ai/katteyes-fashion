@@ -124,7 +124,18 @@
 - `POST /api/v1/admin/products/{product}/images/reorder` → reorder (Task 5.4)
 
 ### Orders (create + retrieve + admin + customer my-orders)
-_(populated by Phase 6)_
+- `Order::user()` → belongsTo(User) (nullable)
+- `Order::items()` → hasMany(OrderItem)
+- `User::orders()` → hasMany(Order) (added in Task 6.2)
+- `orders` table: id, order_number 20 unique, user_id FK nullOnDelete, status enum('new','confirmed','shipped','delivered','cancelled') default 'new', customer_name 100, customer_email 150 nullable, customer_address text, customer_notes text nullable, subtotal decimal(10,2), total decimal(10,2), currency 3 default 'YER', whatsapp_sent_at nullable, timestamps; INDEX (status, created_at), (user_id, created_at)
+- `OrderItem::order()` → belongsTo(Order)
+- `OrderItem::product()` → belongsTo(Product) (restrictOnDelete)
+- `OrderItemFactory` and `OrderFactory` for tests
+- `order_items` table: id, order_id FK cascadeOnDelete, product_id FK restrictOnDelete, product_name 150, price decimal(10,2), color 50, size 50, quantity int, timestamps; INDEX (order_id)
+- `POST /api/v1/orders` → create order + WhatsApp link (Task 6.4/6.5)
+- `GET /api/v1/orders/{order_number}` → view order (Task 6.6)
+- `GET /api/v1/admin/orders` → admin list (Task 6.7)
+- `GET /api/v1/my/orders` → customer orders list (Task 6.7)
 
 ### Image Upload Pipeline
 - `ProductImage` model → `api/app/Models/ProductImage.php:11`
