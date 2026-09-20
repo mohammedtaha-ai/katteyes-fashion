@@ -134,6 +134,11 @@
 - `order_items` table: id, order_id FK cascadeOnDelete, product_id FK restrictOnDelete, product_name 150, price decimal(10,2), color 50, size 50, quantity int, timestamps; INDEX (order_id)
 - `POST /api/v1/orders` → create order + WhatsApp link (Task 6.4/6.5)
 - `GET /api/v1/orders/{order_number}` → view order (Task 6.6)
+- `OrderController::show(Request, string $order_number)` → `api/app/Http/Controllers/Api/V1/OrderController.php:18`
+  - If authenticated: `order.user_id == auth()->id` else 404
+  - If guest: `?email=` query param must match `order.customer_email` else 404
+  - Returns `OrderResource` with eager-loaded items
+- `GET /api/v1/orders/{order_number}` → public route in `routes/api.php` (auth check happens inside controller; no middleware on the route itself)
 - `GET /api/v1/admin/orders` → admin list (Task 6.7)
 - `GET /api/v1/my/orders` → customer orders list (Task 6.7)
 - `OrderNumberGenerator::generate(?int $year = null): string` → `api/app/Services/OrderNumberGenerator.php:11`
