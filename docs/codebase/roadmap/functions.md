@@ -267,6 +267,15 @@ _(populated by Phase 8.5–8.6)_
   - Variants: primary (brand-accent → black hover), ghost, outline
   - Sizes: sm, md, lg
 - `useDebounced(value, ms=300)` inline hook in HomePage (300ms debounce for search)
+- ProductDetailPage → `web/src/pages/storefront/ProductDetailPage.tsx` (Task 8.2)
+  - Slider (CSS scroll-snap) + OptionPicker (color + size) + price + description + add-to-cart
+  - Defaults: empty colors/sizes → ['الافتراضي'] / ['مقاس واحد']
+  - addItem → navigate('/cart')
+- ProductSlider → `web/src/components/product/ProductSlider.tsx` (Task 8.2)
+  - CSS scroll-snap horizontal scroll; prev/next chevron buttons; pagination dots
+  - SVG placeholder fallback when images is empty
+- OptionPicker<T extends string> → `web/src/components/product/OptionPicker.tsx` (Task 8.2)
+  - Generic typed option list with selected/unselected visual state
 
 ### Cart + Checkout
 _(populated by Phase 8.3–8.4)_
