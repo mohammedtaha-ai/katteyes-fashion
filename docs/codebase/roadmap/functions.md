@@ -136,6 +136,14 @@
 - `GET /api/v1/orders/{order_number}` → view order (Task 6.6)
 - `GET /api/v1/admin/orders` → admin list (Task 6.7)
 - `GET /api/v1/my/orders` → customer orders list (Task 6.7)
+- `OrderNumberGenerator::generate(?int $year = null): string` → `api/app/Services/OrderNumberGenerator.php:11`
+  - Format: `ORD-{YYYY}-{NNNNNN}` (zero-padded per-year sequence)
+  - Queries DB for max existing order_number for the year + 1
+  - Pure logic (no DB writes); testable with RefreshDatabase
+- `WhatsAppMessageBuilder::build(Order): string` → `api/app/Services/WhatsAppMessageBuilder.php:11`
+  - Format: header (order number, customer info) + items list + total
+  - Items show: `index. name (color - size) × qty = subtotal currency`
+  - Default note when null: `لا يوجد`
 
 ### Image Upload Pipeline
 - `ProductImage` model → `api/app/Models/ProductImage.php:11`
