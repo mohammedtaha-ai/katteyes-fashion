@@ -71,7 +71,7 @@ docker compose exec web npm run lint                   # eslint
 docker compose exec web npm run type-check             # tsc --noEmit
 
 # Build
-docker compose exec web npm run build                  # production build → dist/
+docker compose exec web npm run build                  # production build → dist/ (tsc -b + vite build)
 docker compose exec web npm run preview                # preview production build
 
 # Add a package
