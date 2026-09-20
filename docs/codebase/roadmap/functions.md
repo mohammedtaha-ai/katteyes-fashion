@@ -208,7 +208,14 @@ _(populated by Phase 9.7)_
 ## web/ — Frontend
 
 ### API layer
-_(populated by Phase 7)_
+- `apiClient` (axios instance) → `web/src/api/client.ts:4`
+  - `baseURL` from `VITE_API_URL`
+  - Request interceptor: attaches `Bearer <token>` from `useAuthStore`
+  - Response interceptor: on 401 → `useAuthStore.clear()` + redirect to `/login` (unless URL contains `/auth/login`)
+- `web/src/api/types.ts` → User, Category, Product, ProductImage, Order, OrderItem TypeScript interfaces
+- `useAuthStore` (PLACEHOLDER, fully implemented in Task 7.3) → `web/src/stores/auth-store.ts:10`
+- MSW mocks at `web/src/__tests__/mocks/handlers.ts` + `mocks/server.ts`
+- Vitest setup with jsdom + @testing-library/jest-dom at `web/src/__tests__/setup.ts`
 
 ### Stores (Zustand)
 _(populated by Phase 7.3)_
