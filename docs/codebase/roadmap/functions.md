@@ -272,7 +272,14 @@ _(populated by Phase 8.7–8.8)_
 - (Phase 7.1 foundation): Tailwind CSS v3 + brand palette (#111111, #d4af37, #f9f9f9) + Tajawal font via @fontsource + Radix UI primitives
 - `cn(...)` utility at `web/src/lib/utils.ts` (combines clsx + tailwind-merge)
 - `formatCurrency(value, currency='YER')` utility at `web/src/lib/utils.ts` (uses ar-YE locale)
-- (populated by Phase 7.6)
+- `StorefrontLayout` → `web/src/components/layout/StorefrontLayout.tsx` (Task 7.6)
+  - `dir="rtl"` + brand-light background; renders `<Header />` + `<Outlet />`
+- `AdminLayout` → `web/src/components/layout/AdminLayout.tsx` (Task 7.6)
+  - Sidebar (products/categories/orders/users) + `<Outlet />`; logout button clears auth
+- `Header` → `web/src/components/layout/Header.tsx` (Task 7.6)
+  - Brand logo, admin settings icon (admin only), user name → /my-orders, login button (when guest), cart icon + badge (totalItems)
+- `CategoryTabs` → `web/src/components/layout/CategoryTabs.tsx` (Task 7.6)
+  - Horizontal scroll tabs with "All" + category pills; controlled active/onChange props
 
 ---
 
@@ -287,11 +294,11 @@ _(populated by Phase 8.7–8.8)_
 ### Routes summary (`api/routes/api.php`)
 _(populated as routes are wired in Phases 2–6)_
 
-### Frontend routes (`web/src/routes.tsx`) — Task 7.5
+### Frontend routes (`web/src/routes.tsx`) — Task 7.5 / 7.6
 - `AppRoutes` → `web/src/routes.tsx`
-  - Storefront: `/`, `/products/:slug`, `/cart`, `/checkout`, `/order-confirmed/:orderNumber`, `/login`, `/register`, `/my-orders` (RequireAuth)
-  - Admin: `/admin`, `/admin/products`, `/admin/categories`, `/admin/orders`, `/admin/users` (RequireAuth roles=['admin'])
-  - 404: catch-all → NotFoundPage
+  - Standalone: `/login`, `/register` (no layout chrome)
+  - Admin layout (all require admin role): `/admin` (index → products), `/admin/products`, `/admin/categories`, `/admin/orders`, `/admin/users`
+  - Storefront layout: `/`, `/products/:slug`, `/cart`, `/checkout`, `/order-confirmed/:orderNumber`, `/my-orders` (RequireAuth), 404 catch-all
 - `RequireAuth({roles?, children})` → `web/src/components/auth/RequireAuth.tsx`
   - No token → `<Navigate to="/login" state={{ from }} replace />`
   - Roles mismatch → `<Navigate to="/" replace />`
