@@ -260,7 +260,13 @@ _(populated by Phase 9.7)_
 _(populated by Phase 8.5–8.6)_
 
 ### Storefront (Home / Detail)
-_(populated by Phase 8.1–8.2)_
+- (Task 8.1): HomePage at `web/src/pages/storefront/HomePage.tsx` — hero banner (assets/hero.png), debounced search (300ms), CategoryTabs, ProductGrid fed by `useProducts({category, q})`
+- ProductCard → `web/src/components/product/ProductCard.tsx` — image (with SVG placeholder fallback), category tag, name, `formatCurrency` price, click navigates to /products/:slug
+- ProductGrid → `web/src/components/product/ProductGrid.tsx` — responsive 2/3/4-column grid; empty-state message
+- Button → `web/src/components/ui/Button.tsx` (shadcn-style cva)
+  - Variants: primary (brand-accent → black hover), ghost, outline
+  - Sizes: sm, md, lg
+- `useDebounced(value, ms=300)` inline hook in HomePage (300ms debounce for search)
 
 ### Cart + Checkout
 _(populated by Phase 8.3–8.4)_
