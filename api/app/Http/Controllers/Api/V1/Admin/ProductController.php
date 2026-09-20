@@ -6,8 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\ProductUpsertRequest;
 use App\Http\Resources\ProductResource;
 use App\Models\Product;
+use App\Actions\UploadImageAction;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
@@ -27,10 +29,19 @@ class ProductController extends Controller
         return ProductResource::collection($q->paginate(20));
     }
 
-    public function store(ProductUpsertRequest $r)
+    public function store(ProductUpsertRequest $r, UploadImageAction $action)
     {
         $p = Product::create($r->validated())->fresh();
         $p->load('category');
+
+        if ($r->hasFile('images')) {
+            $paths = $action->handle($r->file('images'));
+            foreach ($paths as $i => $path) {
+                $p->images()->create(['path' => $path, 'sort_order' => $i]);
+            }
+            $p->load('images');
+        }
+
         return response()->json(['data' => new ProductResource($p)], 201);
     }
 
@@ -40,11 +51,26 @@ class ProductController extends Controller
         return ['data' => new ProductResource($p)];
     }
 
-    public function update(ProductUpsertRequest $r, $product)
+    public function update(ProductUpsertRequest $r, $product, UploadImageAction $action)
     {
         $p = Product::withTrashed()->findOrFail($product);
         $p->update($r->validated());
         $p->load('category');
+
+        if ($r->hasFile('images')) {
+            // REPLACE mode: delete old + upload new
+            $oldImages = $p->images()->get();
+            $paths = $action->handle($r->file('images'));
+            $p->images()->delete();
+            foreach ($paths as $i => $path) {
+                $p->images()->create(['path' => $path, 'sort_order' => $i]);
+            }
+            foreach ($oldImages as $old) {
+                Storage::disk(config('filesystems.default'))->delete($old->path);
+            }
+            $p->load('images');
+        }
+
         return ['data' => new ProductResource($p)];
     }
 

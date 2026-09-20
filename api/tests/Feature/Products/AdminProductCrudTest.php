@@ -6,6 +6,8 @@ use App\Models\Category;
 use App\Models\Product;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
@@ -29,11 +31,13 @@ class AdminProductCrudTest extends TestCase
 
     public function test_admin_can_create_update_soft_delete_restore_force_delete(): void
     {
+        Storage::fake('public');
         $this->asAdmin();
         $cat = Category::factory()->create();
-        $create = $this->postJson('/api/v1/admin/products', [
+        $create = $this->post('/api/v1/admin/products', [
             'name' => 'فستان', 'slug' => 'dress-1',
             'price' => 3500, 'currency' => 'YER', 'category_id' => $cat->id,
+            'images' => [UploadedFile::fake()->image('dress.jpg', 800, 800)],
         ]);
         $create->assertCreated()->assertJsonPath('data.name', 'فستان');
         $id = $create->json('data.id');
