@@ -229,7 +229,10 @@ _(populated by Phase 8.3–8.4)_
 _(populated by Phase 8.7–8.8)_
 
 ### Layout
-_(populated by Phase 7.6)_
+- (Phase 7.1 foundation): Tailwind CSS v3 + brand palette (#111111, #d4af37, #f9f9f9) + Tajawal font via @fontsource + Radix UI primitives
+- `cn(...)` utility at `web/src/lib/utils.ts` (combines clsx + tailwind-merge)
+- `formatCurrency(value, currency='YER')` utility at `web/src/lib/utils.ts` (uses ar-YE locale)
+- (populated by Phase 7.6)
 
 ---
 
