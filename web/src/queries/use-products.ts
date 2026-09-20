@@ -43,7 +43,7 @@ export const useUpdateProduct = () => {
       productsApi.adminUpdate(id, form),
     onSuccess: (_data, { id }) => {
       qc.invalidateQueries({ queryKey: productKeys.all })
-      qc.invalidateQueries({ queryKey: productKeys.details() })
+      qc.invalidateQueries({ queryKey: productKeys.detail(String(id)) })
     },
   })
 }
