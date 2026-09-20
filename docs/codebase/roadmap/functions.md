@@ -153,6 +153,14 @@
   - Creates order + items in DB transaction
 - `StoreOrderRequest::rules()` → items array min:1 max:50 + items.* (product_id exists, color+size required string, quantity integer 1-99), customer_name 100, customer_address 1000, customer_notes 1000 nullable, customer_email required if guest
 - `StoreOrderRequest::messages()` → maps validation errors to exact spec §7.4 Arabic strings
+- `OrderResource::toArray()` → `api/app/Http/Resources/OrderResource.php:11`
+  - Fields: order_number, status, customer_name/email/address/notes, subtotal/total, currency, whatsapp_link (built from WhatsAppMessageBuilder + `services.whatsapp.number`), created_at, items (whenLoaded)
+  - `whatsapp_link` format: `https://wa.me/{number}?text={url-encoded-message}`
+- `OrderController::store(StoreOrderRequest, CreateOrderAction)` → `api/app/Http/Controllers/Api/V1/OrderController.php:11`
+  - Public endpoint, no auth required (guests can checkout)
+  - Returns 201 with `OrderResource` (eager-loaded items)
+- `POST /api/v1/orders` → public route in `routes/api.php` (added in Task 6.5)
+- `services.whatsapp.number` config → env-backed (default 967713301759)
 
 ### Image Upload Pipeline
 - `ProductImage` model → `api/app/Models/ProductImage.php:11`
