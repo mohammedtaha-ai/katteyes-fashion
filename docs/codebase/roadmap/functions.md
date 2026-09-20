@@ -102,9 +102,26 @@
 - `ProductController::destroy($product)` → soft delete
 - `ProductController::restore($product)` → restore soft-deleted
 - `ProductController::forceDestroy($product)` → hard delete (uses withTrashed so it works on restored rows too)
+- `ProductController::appendImages(Request, UploadImageAction, $product)` → line 96
+  - Validates `images[]` (required, max 20, 10MB each)
+  - Computes next `sort_order` from max existing
+  - Calls `UploadImageAction` + creates `ProductImage` rows
+  - Returns 200 with `ProductImageResource` collection
+- `ProductController::deleteImage($product, $image)` → line 114
+  - Returns 422 "لا يمكن حذف آخر صورة" if it's the last image (spec §7.2)
+  - Deletes `ProductImage` row + storage file
+  - Returns 204
+- `ProductController::reorderImages(Request, $product)` → line 129
+  - Validates `ids[]` matches product's current image IDs exactly (no missing, no extras)
+  - Updates each `sort_order` based on new position
+  - Returns 204 (or 422 if mismatch)
 - `ProductUpsertRequest::rules()` → name required, slug required unique (excludes current id via route('product')), currency size:3, category_id exists, is_active boolean, images[] (required on POST, sometimes on PATCH) — each file|image|mimes:jpeg,jpg,png,webp|max:10240
   - Tests: `api/tests/Feature/Products/AdminProductImagesTest.php` (4 cases: create requires image, create persists ProductImage, update REPLACES images, update without images preserves)
+  - Tests: `api/tests/Feature/Products/ProductImageManagementTest.php` (5 cases: append adds to gallery, delete last returns 422, delete non-last removes row+file, reorder with valid IDs, reorder with invalid IDs returns 422) — Task 5.4
 - `GET|HEAD /api/v1/admin/products`, `POST /api/v1/admin/products`, `GET|HEAD /api/v1/admin/products/{product}`, `PUT|PATCH /api/v1/admin/products/{product}`, `DELETE /api/v1/admin/products/{product}`, `POST /api/v1/admin/products/{product}/restore`, `DELETE /api/v1/admin/products/{product}/force` → all under `auth:sanctum + role:admin` middleware group in `api/routes/api.php` (Task 4.5)
+- `POST /api/v1/admin/products/{product}/images` → append (Task 5.4)
+- `DELETE /api/v1/admin/products/{product}/images/{image}` → delete one (Task 5.4)
+- `POST /api/v1/admin/products/{product}/images/reorder` → reorder (Task 5.4)
 
 ### Orders (create + retrieve + admin + customer my-orders)
 _(populated by Phase 6)_
