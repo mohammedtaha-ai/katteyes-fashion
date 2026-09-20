@@ -287,5 +287,13 @@ _(populated by Phase 8.7–8.8)_
 ### Routes summary (`api/routes/api.php`)
 _(populated as routes are wired in Phases 2–6)_
 
-### Frontend routes (`web/src/routes.tsx`)
-_(populated in Phase 7.5)_
+### Frontend routes (`web/src/routes.tsx`) — Task 7.5
+- `AppRoutes` → `web/src/routes.tsx`
+  - Storefront: `/`, `/products/:slug`, `/cart`, `/checkout`, `/order-confirmed/:orderNumber`, `/login`, `/register`, `/my-orders` (RequireAuth)
+  - Admin: `/admin`, `/admin/products`, `/admin/categories`, `/admin/orders`, `/admin/users` (RequireAuth roles=['admin'])
+  - 404: catch-all → NotFoundPage
+- `RequireAuth({roles?, children})` → `web/src/components/auth/RequireAuth.tsx`
+  - No token → `<Navigate to="/login" state={{ from }} replace />`
+  - Roles mismatch → `<Navigate to="/" replace />`
+  - Otherwise render children
+- Placeholder page components at `web/src/pages/*` + `web/src/pages/admin/*` (filled in by Phase 8)
