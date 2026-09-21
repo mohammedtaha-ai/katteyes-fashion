@@ -35,20 +35,22 @@ class ProductController extends Controller
         $p = Product::create($r->validated())->fresh();
         $p->load('category');
 
+        $this->syncOptions($p, $r->validated());
+
         if ($r->hasFile('images')) {
             $paths = $action->handle($r->file('images'));
             foreach ($paths as $i => $path) {
                 $p->images()->create(['path' => $path, 'sort_order' => $i]);
             }
-            $p->load('images');
         }
+        $p->load(['images', 'options']);
 
         return response()->json(['data' => new ProductResource($p)], 201);
     }
 
     public function show($product)
     {
-        $p = Product::withTrashed()->with('category')->findOrFail($product);
+        $p = Product::withTrashed()->with(['category', 'images', 'options'])->findOrFail($product);
         return ['data' => new ProductResource($p)];
     }
 
@@ -57,6 +59,8 @@ class ProductController extends Controller
         $p = Product::withTrashed()->findOrFail($product);
         $p->update($r->validated());
         $p->load('category');
+
+        $this->syncOptions($p, $r->validated());
 
         if ($r->hasFile('images')) {
             // REPLACE mode: delete old + upload new
@@ -69,10 +73,26 @@ class ProductController extends Controller
             foreach ($oldImages as $old) {
                 Storage::disk(config('filesystems.default'))->delete($old->path);
             }
-            $p->load('images');
         }
+        $p->load(['images', 'options']);
 
         return ['data' => new ProductResource($p)];
+    }
+
+    private function syncOptions(Product $product, array $validated): void
+    {
+        $product->options()->delete();
+        $options = [];
+        $sort = 0;
+        foreach ($validated['colors'] ?? [] as $color) {
+            $options[] = ['type' => 'color', 'value' => $color, 'sort_order' => $sort++];
+        }
+        foreach ($validated['sizes'] ?? [] as $size) {
+            $options[] = ['type' => 'size', 'value' => $size, 'sort_order' => $sort++];
+        }
+        if (count($options) > 0) {
+            $product->options()->createMany($options);
+        }
     }
 
     public function destroy($product)
