@@ -4,6 +4,8 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 echo "== Katteyes setup =="
 [ -f .env ] || cp .env.example .env
+[ -f api/.env ] || cp api/.env.example api/.env
+[ -f web/.env ] || cp web/.env.example web/.env
 
 if [ "${LOCAL:-0}" = "1" ]; then
   echo "LOCAL mode (no Docker)"
