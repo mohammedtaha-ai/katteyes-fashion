@@ -142,4 +142,42 @@ describe('SmartProductCard', () => {
 
     expect(mockNavigate).toHaveBeenCalledWith('/products/royal-velvet-dress')
   })
+
+  it('provides keyboard accessibility with role="link", tabIndex=0, and responds to Enter/Space', () => {
+    render(
+      <MemoryRouter>
+        <SmartProductCard product={sampleProduct} />
+      </MemoryRouter>,
+    )
+
+    const card = screen.getByTestId('product-card')
+    expect(card).toHaveAttribute('role', 'link')
+    expect(card).toHaveAttribute('tabindex', '0')
+    expect(card).toHaveAttribute('aria-label', 'عرض تفاصيل فستان مخملي ملكي')
+
+    // Press Enter
+    fireEvent.keyDown(card, { key: 'Enter' })
+    expect(mockNavigate).toHaveBeenCalledWith('/products/royal-velvet-dress')
+
+    mockNavigate.mockClear()
+
+    // Press Space
+    fireEvent.keyDown(card, { key: ' ' })
+    expect(mockNavigate).toHaveBeenCalledWith('/products/royal-velvet-dress')
+  })
+
+  it('omits "جديد ✨" badge when created_at is in the future', () => {
+    const futureProduct = {
+      ...sampleProduct,
+      created_at: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(),
+    }
+
+    render(
+      <MemoryRouter>
+        <SmartProductCard product={futureProduct} />
+      </MemoryRouter>,
+    )
+
+    expect(screen.queryByTestId('badge-new')).not.toBeInTheDocument()
+  })
 })

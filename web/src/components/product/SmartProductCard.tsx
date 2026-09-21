@@ -62,7 +62,8 @@ export function SmartProductCard({ product }: { product: Product }) {
     const time = new Date(product.created_at).getTime()
     if (isNaN(time)) return false
     const sevenDaysMs = 7 * 24 * 60 * 60 * 1000
-    return Date.now() - time <= sevenDaysMs
+    const diff = Date.now() - time
+    return diff >= 0 && diff <= sevenDaysMs
   })()
 
   const handleQuickAdd = (e: React.MouseEvent) => {
@@ -96,8 +97,17 @@ export function SmartProductCard({ product }: { product: Product }) {
   return (
     <div
       onClick={handleCardClick}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          handleCardClick()
+        }
+      }}
+      tabIndex={0}
+      role="link"
+      aria-label={`عرض تفاصيل ${product.name}`}
       data-testid="product-card"
-      className="group bg-white rounded-xl overflow-hidden shadow-xs hover:shadow-md border border-zinc-100 transition-all duration-300 cursor-pointer flex flex-col justify-between"
+      className="group bg-white rounded-xl overflow-hidden shadow-xs hover:shadow-md border border-zinc-100 transition-all duration-300 cursor-pointer flex flex-col justify-between focus:outline-none focus:ring-2 focus:ring-brand-accent"
     >
       {/* 3:4 Aspect Ratio Image Box */}
       <div className="relative aspect-[3/4] w-full overflow-hidden bg-zinc-100">
