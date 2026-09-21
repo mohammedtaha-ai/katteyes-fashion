@@ -22,8 +22,8 @@ interface Props {
   images: ProductImage[]
   newFiles: File[]
   onNewFilesChange: (files: File[]) => void
-  onDelete: (imageId: number) => void
-  onReorder: (orderedIds: number[]) => void
+  onDelete?: (imageId: number) => void
+  onReorder?: (orderedIds: number[]) => void
 }
 
 function SortableThumb({
@@ -31,7 +31,7 @@ function SortableThumb({
   onDelete,
 }: {
   image: ProductImage
-  onDelete: (id: number) => void
+  onDelete?: (id: number) => void
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id: image.id })
@@ -65,7 +65,7 @@ function SortableThumb({
       </button>
       <button
         type="button"
-        onClick={() => onDelete(image.id)}
+        onClick={() => onDelete?.(image.id)}
         className="absolute top-0 start-0 bg-red-600 text-white p-1"
         aria-label="حذف الصورة"
         data-testid={`img-delete-${image.id}`}
@@ -110,7 +110,7 @@ export function ImageUploader({
     const newIndex = images.findIndex((i) => i.id === over.id)
     if (oldIndex < 0 || newIndex < 0) return
     const reordered = arrayMove(images, oldIndex, newIndex)
-    onReorder(reordered.map((i) => i.id))
+    onReorder?.(reordered.map((i) => i.id))
   }
 
   return (
