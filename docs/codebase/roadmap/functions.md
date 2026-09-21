@@ -166,6 +166,11 @@ This file is the cross-agent knowledge base. Every task appends `ClassName::meth
 - `useAdminOrders(params)` / `useAdminOrder(orderNumber)` → admin order list + detail
 - `useUpdateOrderStatus()` / `useDeleteOrder()` → admin mutations invalidating orderKeys.detail + orderKeys.lists
 
+### Account UI
+- `MyOrdersPage` → `web/src/pages/account/MyOrdersPage.tsx` (Task 8.6)
+  - useMyOrders → list of customer orders with order_number + status label (AR) + total + created date
+  - Empty state + WhatsApp replay link per order
+
 ### Pages
 - `HomePage` → `web/src/pages/storefront/HomePage.tsx` (Task 8.1) — hero banner (assets/hero.png), debounced search (300ms), CategoryTabs, ProductGrid fed by `useProducts({category, q})`
 - `useDebounced(value, ms=300)` inline hook in HomePage
