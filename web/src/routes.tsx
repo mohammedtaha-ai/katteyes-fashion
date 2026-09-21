@@ -11,8 +11,10 @@ import { LoginPage } from '@/pages/auth/LoginPage'
 import { RegisterPage } from '@/pages/auth/RegisterPage'
 import { MyOrdersPage } from '@/pages/account/MyOrdersPage'
 import { AdminProductsPage } from '@/pages/admin/AdminProductsPage'
+import { AdminProductEditPage } from '@/pages/admin/AdminProductEditPage'
 import { AdminCategoriesPage } from '@/pages/admin/AdminCategoriesPage'
 import { AdminOrdersPage } from '@/pages/admin/AdminOrdersPage'
+import { AdminOrderDetailPage } from '@/pages/admin/AdminOrderDetailPage'
 import { AdminUsersPage } from '@/pages/admin/AdminUsersPage'
 import { NotFoundPage } from '@/pages/NotFoundPage'
 
@@ -34,8 +36,32 @@ export function AppRoutes() {
       >
         <Route index element={<Navigate to="/admin/products" replace />} />
         <Route path="products" element={<AdminProductsPage />} />
+        <Route
+          path="products/new"
+          element={
+            <RequireAuth roles={['admin']}>
+              <AdminProductEditPage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="products/:id"
+          element={
+            <RequireAuth roles={['admin']}>
+              <AdminProductEditPage />
+            </RequireAuth>
+          }
+        />
         <Route path="categories" element={<AdminCategoriesPage />} />
         <Route path="orders" element={<AdminOrdersPage />} />
+        <Route
+          path="orders/:orderNumber"
+          element={
+            <RequireAuth roles={['admin']}>
+              <AdminOrderDetailPage />
+            </RequireAuth>
+          }
+        />
         <Route path="users" element={<AdminUsersPage />} />
       </Route>
 
