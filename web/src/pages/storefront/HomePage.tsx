@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react'
-import { Search } from 'lucide-react'
-import heroImg from '@/assets/hero.png'
-import { CategoryTabs } from '@/components/layout/CategoryTabs'
-import { ProductGrid } from '@/components/product/ProductGrid'
+import { Search, ShoppingBag } from 'lucide-react'
 import { useProducts } from '@/queries/use-products'
+import { HeroPromoSlider } from '@/components/storefront/HeroPromoSlider'
+import { CategoryStoryBar } from '@/components/storefront/CategoryStoryBar'
+import { SmartProductCard } from '@/components/product/SmartProductCard'
+import { ProductGridSkeleton } from '@/components/shared/ProductGridSkeleton'
+import { ErrorBoundary } from '@/components/shared/ErrorBoundary'
 
 function useDebounced<T>(value: T, ms = 300): T {
   const [v, setV] = useState(value)
@@ -17,7 +19,7 @@ function useDebounced<T>(value: T, ms = 300): T {
 export function HomePage() {
   const [category, setCategory] = useState('')
   const [searchInput, setSearchInput] = useState('')
-  const debouncedSearch = useDebounced(searchInput)
+  const debouncedSearch = useDebounced(searchInput, 300)
 
   const { data, isLoading } = useProducts({
     category: category || undefined,
@@ -27,20 +29,18 @@ export function HomePage() {
   const products = data?.data?.data ?? []
 
   return (
-    <div>
-      {/* Hero */}
-      <section className="bg-gradient-to-l from-brand-accent/20 to-white px-4 py-8 text-center">
-        <img src={heroImg} alt="Katteyes Fashion" className="mx-auto h-32 mb-4" />
-        <h1 className="text-2xl font-black mb-1">أزياء عصرية بأناقة لا تُضاهى</h1>
-        <p className="text-sm text-zinc-600">اكتشفي أحدث صيحات الموضة</p>
-      </section>
+    <div className="min-h-screen bg-brand-light pb-16">
+      {/* Hero Promo Slider */}
+      <ErrorBoundary>
+        <HeroPromoSlider />
+      </ErrorBoundary>
 
-      {/* Search */}
-      <div className="px-4 py-3 bg-white border-b">
-        <div className="relative">
+      {/* Debounced Search Bar */}
+      <div className="px-4 py-3 bg-white border-b border-zinc-100 shadow-xs">
+        <div className="max-w-2xl mx-auto relative">
           <Search
-            size={16}
-            className="absolute top-1/2 -translate-y-1/2 start-3 text-zinc-400"
+            size={18}
+            className="absolute top-1/2 -translate-y-1/2 start-3.5 text-zinc-400 pointer-events-none"
           />
           <input
             type="search"
@@ -48,20 +48,49 @@ export function HomePage() {
             onChange={(e) => setSearchInput(e.target.value)}
             placeholder="ابحثي عن منتج..."
             data-testid="search-input"
-            className="w-full h-10 ps-9 pe-3 rounded-full bg-zinc-100 text-sm focus:outline-none focus:ring-2 focus:ring-brand-accent"
+            className="w-full h-11 ps-10 pe-4 rounded-full bg-zinc-100 text-sm focus:outline-none focus:ring-2 focus:ring-brand-accent transition text-zinc-900 placeholder:text-zinc-400"
           />
         </div>
       </div>
 
-      {/* Category tabs */}
-      <CategoryTabs active={category} onChange={setCategory} />
+      {/* Instagram Story-styled Category Bar */}
+      <ErrorBoundary>
+        <CategoryStoryBar
+          activeCategory={category}
+          onSelectCategory={setCategory}
+        />
+      </ErrorBoundary>
 
-      {/* Grid */}
-      {isLoading ? (
-        <div className="p-8 text-center text-zinc-500">جاري التحميل...</div>
-      ) : (
-        <ProductGrid products={products} />
-      )}
+      {/* Main Products Section */}
+      <main className="max-w-7xl mx-auto px-4 py-6" id="products">
+        {isLoading ? (
+          <ProductGridSkeleton count={8} />
+        ) : products.length === 0 ? (
+          <div
+            data-testid="empty-products"
+            className="p-12 text-center text-zinc-500 bg-white rounded-2xl border border-zinc-100 shadow-xs max-w-md mx-auto my-8"
+          >
+            <ShoppingBag className="mx-auto mb-3 h-12 w-12 text-zinc-300" />
+            <h3 className="font-bold text-base text-zinc-800">لا توجد منتجات</h3>
+            <p className="text-xs text-zinc-500 mt-1">
+              {searchInput
+                ? `لم يتم العثور على أي نتائج مطابقة لـ "${searchInput}". جربي كلمات أخرى.`
+                : 'لا توجد منتجات متوفرة في هذا القسم حالياً.'}
+            </p>
+          </div>
+        ) : (
+          <div
+            data-testid="product-grid"
+            className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6"
+          >
+            {products.map((p) => (
+              <ErrorBoundary key={p.id}>
+                <SmartProductCard product={p} />
+              </ErrorBoundary>
+            ))}
+          </div>
+        )}
+      </main>
     </div>
   )
 }

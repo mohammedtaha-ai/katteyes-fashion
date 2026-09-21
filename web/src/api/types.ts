@@ -14,6 +14,7 @@ export interface Product {
   images: ProductImage[]
   colors: string[]
   sizes: string[]
+  created_at?: string
 }
 
 export interface OrderItem { product_name: string; price: number; color: string; size: string; quantity: number; subtotal: number }
