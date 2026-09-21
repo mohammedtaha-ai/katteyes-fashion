@@ -51,4 +51,6 @@ Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->group(functi
     Route::get   ('orders/{order_number}', [\App\Http\Controllers\Api\V1\Admin\OrderController::class, 'show']);
     Route::patch ('orders/{order_number}', [\App\Http\Controllers\Api\V1\Admin\OrderController::class, 'update']);
     Route::delete('orders/{order_number}', [\App\Http\Controllers\Api\V1\Admin\OrderController::class, 'destroy']);
+
+    Route::get('dashboard/stats', [\App\Http\Controllers\Api\V1\Admin\DashboardController::class, 'stats']);
 });
