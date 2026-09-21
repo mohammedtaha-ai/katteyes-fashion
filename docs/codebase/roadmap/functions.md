@@ -140,6 +140,26 @@ This file is the cross-agent knowledge base. Every task appends `ClassName::meth
 - `CartSummary` → `web/src/components/cart/CartSummary.tsx` (Task 8.3)
   - Total + count + "go to checkout" button → navigate('/checkout')
 
+### Checkout UI
+- `CheckoutForm` → `web/src/components/checkout/CheckoutForm.tsx` (Task 8.4)
+  - RHF + Zod schema: customer_name (required, max 100), customer_email (optional, valid email), customer_address (required, max 1000), customer_notes (optional, max 1000)
+  - Disabled submit when cart empty or submitting
+- `CheckoutPage` → `web/src/pages/storefront/CheckoutPage.tsx` (Task 8.4)
+  - useMutation → ordersApi.create → onSuccess: window.open(whatsapp_link) + clearCart + navigate(/order-confirmed/:number)
+  - useEffect: empty cart → redirect to /cart
+  - RHF + Zod validation via CheckoutForm
+- `OrderConfirmedPage` → `web/src/pages/storefront/OrderConfirmedPage.tsx` (Task 8.4)
+  - useOrder(orderNumber) → useEffect opens whatsapp_link
+  - Shows order number + back-to-home link
+
+### Queries
+- `useOrder(orderNumber)` → `web/src/queries/use-orders.ts` (Task 8.4) — single order fetch via ordersApi.show(orderNumber, email?); enabled when orderNumber truthy
+- `useMyOrder(orderNumber)` → `web/src/queries/use-orders.ts` — authenticated customer order detail
+- `useAdminOrders(params)` / `useAdminOrder(orderNumber)` → admin order list + detail
+- `useUpdateOrderStatus()` / `useDeleteOrder()` → admin mutations invalidating orderKeys.detail + orderKeys.lists
+
 ### Pages
 - `HomePage` → `web/src/pages/storefront/HomePage.tsx` (Task 8.1) — hero banner (assets/hero.png), debounced search (300ms), CategoryTabs, ProductGrid fed by `useProducts({category, q})`
 - `useDebounced(value, ms=300)` inline hook in HomePage
+- `CheckoutPage` → `web/src/pages/storefront/CheckoutPage.tsx` (Task 8.4) — order form (see Checkout UI)
+- `OrderConfirmedPage` → `web/src/pages/storefront/OrderConfirmedPage.tsx` (Task 8.4) — confirmation screen + WhatsApp deep-link
