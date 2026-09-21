@@ -1,5 +1,6 @@
 import { Outlet } from 'react-router-dom'
 import { Header } from './Header'
+import { ToastNotification } from '@/components/storefront/ToastNotification'
 
 export function StorefrontLayout() {
   return (
@@ -8,6 +9,7 @@ export function StorefrontLayout() {
       <main>
         <Outlet />
       </main>
+      <ToastNotification />
     </div>
   )
 }
