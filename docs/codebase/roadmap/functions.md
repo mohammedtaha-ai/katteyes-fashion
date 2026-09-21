@@ -152,6 +152,14 @@ This file is the cross-agent knowledge base. Every task appends `ClassName::meth
   - useOrder(orderNumber) → useEffect opens whatsapp_link
   - Shows order number + back-to-home link
 
+### Auth UI
+- `LoginPage` → `web/src/pages/auth/LoginPage.tsx` (Task 8.5)
+  - useMutation → authApi.login → onSuccess: setAuth + navigate by role (admin → /admin/products, customer → /)
+  - TanStack v5: uses m.isError (not m.error)
+- `RegisterPage` → `web/src/pages/auth/RegisterPage.tsx` (Task 8.5)
+  - useMutation → authApi.register → onSuccess: setAuth + navigate('/', replace)
+  - 4 fields: name + email + password + confirm (+ password_confirmation)
+
 ### Queries
 - `useOrder(orderNumber)` → `web/src/queries/use-orders.ts` (Task 8.4) — single order fetch via ordersApi.show(orderNumber, email?); enabled when orderNumber truthy
 - `useMyOrder(orderNumber)` → `web/src/queries/use-orders.ts` — authenticated customer order detail
