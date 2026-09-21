@@ -28,7 +28,10 @@ export const useCreateCategory = () => {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: (payload: CategoryUpsertPayload) => categoriesApi.adminCreate(payload),
-    onSuccess: () => qc.invalidateQueries({ queryKey: categoryKeys.all }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: categoryKeys.all })
+      qc.refetchQueries({ queryKey: [...categoryKeys.all, 'admin'] })
+    },
   })
 }
 
@@ -37,7 +40,10 @@ export const useUpdateCategory = () => {
   return useMutation({
     mutationFn: ({ id, payload }: { id: number; payload: CategoryUpsertPayload }) =>
       categoriesApi.adminUpdate(id, payload),
-    onSuccess: () => qc.invalidateQueries({ queryKey: categoryKeys.all }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: categoryKeys.all })
+      qc.refetchQueries({ queryKey: [...categoryKeys.all, 'admin'] })
+    },
   })
 }
 
@@ -45,7 +51,10 @@ export const useDeleteCategory = () => {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: (id: number) => categoriesApi.adminDelete(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: categoryKeys.all }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: categoryKeys.all })
+      qc.refetchQueries({ queryKey: [...categoryKeys.all, 'admin'] })
+    },
   })
 }
 
@@ -53,6 +62,9 @@ export const useRestoreCategory = () => {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: (id: number) => categoriesApi.adminRestore(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: categoryKeys.all }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: categoryKeys.all })
+      qc.refetchQueries({ queryKey: [...categoryKeys.all, 'admin'] })
+    },
   })
 }

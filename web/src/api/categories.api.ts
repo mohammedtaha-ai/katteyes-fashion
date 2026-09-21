@@ -11,7 +11,7 @@ export interface CategoriesListResponse {
 
 export interface CategoryUpsertPayload {
   name: string
-  slug: string
+  slug?: string
   is_active?: boolean
   sort_order?: number
 }

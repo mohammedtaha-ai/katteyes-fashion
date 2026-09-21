@@ -23,16 +23,22 @@ export function AdminCategoriesPage() {
   const onAdd = () => {
     if (!nameInput.trim()) return
     createC.mutate(
-      { name: nameInput, slug: '' } as any,
-      { onSuccess: () => setNameInput('') },
+      { name: nameInput },
+      {
+        onSuccess: () => setNameInput(''),
+        onError: (e: any) => alert(e?.response?.data?.message ?? 'خطأ في الإضافة'),
+      },
     )
   }
 
   const onSaveEdit = (id: number) => {
     if (!editName.trim()) return
     updateC.mutate(
-      { id, payload: { name: editName, slug: '' } as any },
-      { onSuccess: () => setEditingId(null) },
+      { id, payload: { name: editName } },
+      {
+        onSuccess: () => setEditingId(null),
+        onError: (e: any) => alert(e?.response?.data?.message ?? 'خطأ في التعديل'),
+      },
     )
   }
 
