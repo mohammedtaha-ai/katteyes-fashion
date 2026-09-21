@@ -81,6 +81,10 @@ class ProductController extends Controller
 
     private function syncOptions(Product $product, array $validated): void
     {
+        if (!array_key_exists('colors', $validated) && !array_key_exists('sizes', $validated)) {
+            return;
+        }
+
         $product->options()->delete();
         $options = [];
         $sort = 0;
