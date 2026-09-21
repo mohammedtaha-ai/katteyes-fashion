@@ -12,10 +12,9 @@ apiClient.interceptors.request.use((config) => {
 
   if (
     config.data instanceof FormData &&
-    config.method &&
-    ['put', 'patch'].includes(config.method)
+    ['put', 'patch'].includes(config.method?.toLowerCase() ?? '')
   ) {
-    config.data.append('_method', config.method.toUpperCase())
+    config.data.append('_method', config.method!.toUpperCase())
     config.method = 'post'
   }
 

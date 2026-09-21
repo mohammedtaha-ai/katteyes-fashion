@@ -71,10 +71,9 @@ export const useUpdateProduct = () => {
   return useMutation({
     mutationFn: ({ id, form }: { id: number; form: FormData }) =>
       productsApi.adminUpdate(id, form),
-    onSuccess: (_data, { id }) => {
+    onSuccess: () => {
       qc.invalidateQueries({ queryKey: productKeys.all })
       qc.invalidateQueries({ queryKey: adminProductKeys.all })
-      qc.invalidateQueries({ queryKey: productKeys.detail(String(id)) })
     },
   })
 }
