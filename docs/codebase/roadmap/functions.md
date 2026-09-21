@@ -178,6 +178,12 @@ This file is the cross-agent knowledge base. Every task appends `ClassName::meth
 - `AdminProductEditPage` → `web/src/pages/admin/AdminProductEditPage.tsx` (Task 8.7, images in Task 8.8)
   - RHF + Zod form: name + description + price + currency + category_id + colors (CSV) + sizes (CSV) + is_active
   - POST create / PATCH update via FormData
+  - Task 8.7 review nits fixed: `is_active` boolean coercion via `setValueAs`; `category_id` parsed via `valueAsNumber` with `disabled` placeholder option
+- `ImageUploader` → `web/src/components/admin/ImageUploader.tsx` (Task 8.8)
+  - react-dropzone for new file selection (multi, image/* only)
+  - @dnd-kit for drag-to-reorder existing ProductImage[]
+  - Pending preview for new files (blob URLs)
+  - Wired into AdminProductEditPage: delete = immediate useDeleteImage; reorder = immediate useReorderImages; new files appended via useAppendImages on save
 - `AdminCategoriesPage` → `web/src/pages/admin/AdminCategoriesPage.tsx` (Task 8.7)
   - Add input + edit toggle + delete / restore actions
 - `AdminOrdersPage` → `web/src/pages/admin/AdminOrdersPage.tsx` (Task 8.7)
