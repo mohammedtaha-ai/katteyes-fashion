@@ -171,6 +171,20 @@ This file is the cross-agent knowledge base. Every task appends `ClassName::meth
   - useMyOrders → list of customer orders with order_number + status label (AR) + total + created date
   - Empty state + WhatsApp replay link per order
 
+### Admin UI
+- `AdminProductsPage` → `web/src/pages/admin/AdminProductsPage.tsx` (Task 8.7)
+  - Table of products (name + category + price + status); edit / delete / restore actions
+  - "Add" button → /admin/products/new
+- `AdminProductEditPage` → `web/src/pages/admin/AdminProductEditPage.tsx` (Task 8.7, images in Task 8.8)
+  - RHF + Zod form: name + description + price + currency + category_id + colors (CSV) + sizes (CSV) + is_active
+  - POST create / PATCH update via FormData
+- `AdminCategoriesPage` → `web/src/pages/admin/AdminCategoriesPage.tsx` (Task 8.7)
+  - Add input + edit toggle + delete / restore actions
+- `AdminOrdersPage` → `web/src/pages/admin/AdminOrdersPage.tsx` (Task 8.7)
+  - Table with status filter (new/confirmed/shipped/delivered/cancelled); row → /admin/orders/:number
+- `AdminOrderDetailPage` → `web/src/pages/admin/AdminOrderDetailPage.tsx` (Task 8.7)
+  - Customer info + items table + status <select> wired to useUpdateOrderStatus
+
 ### Pages
 - `HomePage` → `web/src/pages/storefront/HomePage.tsx` (Task 8.1) — hero banner (assets/hero.png), debounced search (300ms), CategoryTabs, ProductGrid fed by `useProducts({category, q})`
 - `useDebounced(value, ms=300)` inline hook in HomePage
