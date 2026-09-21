@@ -38,6 +38,10 @@ export const productsApi = {
     apiClient.get<ProductsListResponse>(`/products${buildQuery(params)}`),
   show: (slug: string) =>
     apiClient.get<ProductResponse>(`/products/${slug}`),
+  adminList: (params: ProductListParams & { status?: string } = {}) =>
+    apiClient.get<ProductsListResponse>(`/admin/products${buildQuery(params)}`),
+  adminShow: (id: number) =>
+    apiClient.get<ProductResponse>(`/admin/products/${id}`),
   adminCreate: (form: FormData) =>
     apiClient.post<ProductResponse>('/admin/products', form),
   adminUpdate: (id: number, form: FormData) =>

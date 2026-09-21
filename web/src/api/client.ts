@@ -9,6 +9,16 @@ export const apiClient = axios.create({
 apiClient.interceptors.request.use((config) => {
   const token = useAuthStore.getState().token
   if (token) config.headers.Authorization = `Bearer ${token}`
+
+  if (
+    config.data instanceof FormData &&
+    config.method &&
+    ['put', 'patch'].includes(config.method)
+  ) {
+    config.data.append('_method', config.method.toUpperCase())
+    config.method = 'post'
+  }
+
   return config
 })
 

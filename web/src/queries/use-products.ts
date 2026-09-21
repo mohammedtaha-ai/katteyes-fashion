@@ -10,8 +10,22 @@ export const productKeys = {
   detail: (slug: string) => [...productKeys.details(), slug] as const,
 }
 
+export const adminProductKeys = {
+  all: ['admin-products'] as const,
+  lists: () => [...adminProductKeys.all, 'list'] as const,
+  list: (filters: Record<string, unknown>) => [...adminProductKeys.lists(), filters] as const,
+  details: () => [...adminProductKeys.all, 'detail'] as const,
+  detail: (id: number) => [...adminProductKeys.details(), id] as const,
+}
+
 export interface UseProductsFilters {
   category?: string
+  q?: string
+}
+
+export interface UseAdminProductsFilters {
+  category?: string
+  status?: string
   q?: string
 }
 
@@ -21,6 +35,12 @@ export const useProducts = (filters: UseProductsFilters = {}) =>
     queryFn: () => productsApi.list({ ...filters, page: 1 }),
   })
 
+export const useAdminProducts = (filters: UseAdminProductsFilters = {}) =>
+  useQuery({
+    queryKey: adminProductKeys.list(filters),
+    queryFn: () => productsApi.adminList({ ...filters, page: 1 }),
+  })
+
 export const useProduct = (slug: string) =>
   useQuery({
     queryKey: productKeys.detail(slug),
@@ -28,11 +48,21 @@ export const useProduct = (slug: string) =>
     enabled: !!slug,
   })
 
+export const useAdminProduct = (id: number) =>
+  useQuery({
+    queryKey: adminProductKeys.detail(id),
+    queryFn: () => productsApi.adminShow(id),
+    enabled: id > 0,
+  })
+
 export const useCreateProduct = () => {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: (form: FormData) => productsApi.adminCreate(form),
-    onSuccess: () => qc.invalidateQueries({ queryKey: productKeys.all }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: productKeys.all })
+      qc.invalidateQueries({ queryKey: adminProductKeys.all })
+    },
   })
 }
 
@@ -43,6 +73,7 @@ export const useUpdateProduct = () => {
       productsApi.adminUpdate(id, form),
     onSuccess: (_data, { id }) => {
       qc.invalidateQueries({ queryKey: productKeys.all })
+      qc.invalidateQueries({ queryKey: adminProductKeys.all })
       qc.invalidateQueries({ queryKey: productKeys.detail(String(id)) })
     },
   })
@@ -52,7 +83,10 @@ export const useDeleteProduct = () => {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: (id: number) => productsApi.adminDelete(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: productKeys.lists() }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: productKeys.all })
+      qc.invalidateQueries({ queryKey: adminProductKeys.all })
+    },
   })
 }
 
@@ -60,7 +94,10 @@ export const useRestoreProduct = () => {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: (id: number) => productsApi.adminRestore(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: productKeys.lists() }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: productKeys.all })
+      qc.invalidateQueries({ queryKey: adminProductKeys.all })
+    },
   })
 }
 
