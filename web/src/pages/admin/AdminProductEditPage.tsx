@@ -223,8 +223,8 @@ export function AdminProductEditPage() {
             className="border rounded p-2 text-sm w-full"
             data-testid="input-name"
           />
-          {(errors.name || serverErrors.name) && (
-            <p className="text-red-500 text-xs mt-1" data-testid="error-name">
+          {Boolean(getFieldError('name')) && (
+            <p className="text-status-danger text-xs mt-1" data-testid="error-name">
               {getFieldError('name')}
             </p>
           )}
@@ -238,8 +238,8 @@ export function AdminProductEditPage() {
             className="border rounded p-2 text-sm w-full"
             data-testid="input-description"
           />
-          {(errors.description || serverErrors.description) && (
-            <p className="text-red-500 text-xs mt-1" data-testid="error-description">
+          {Boolean(getFieldError('description')) && (
+            <p className="text-status-danger text-xs mt-1" data-testid="error-description">
               {getFieldError('description')}
             </p>
           )}
@@ -254,8 +254,8 @@ export function AdminProductEditPage() {
               className="border rounded p-2 text-sm w-full"
               data-testid="input-price"
             />
-            {(errors.price || serverErrors.price) && (
-              <p className="text-red-500 text-xs mt-1" data-testid="error-price">
+            {Boolean(getFieldError('price')) && (
+              <p className="text-status-danger text-xs mt-1" data-testid="error-price">
                 {getFieldError('price')}
               </p>
             )}
@@ -267,8 +267,8 @@ export function AdminProductEditPage() {
               className="border rounded p-2 text-sm w-full"
               data-testid="input-currency"
             />
-            {(errors.currency || serverErrors.currency) && (
-              <p className="text-red-500 text-xs mt-1" data-testid="error-currency">
+            {Boolean(getFieldError('currency')) && (
+              <p className="text-status-danger text-xs mt-1" data-testid="error-currency">
                 {getFieldError('currency')}
               </p>
             )}
@@ -291,8 +291,8 @@ export function AdminProductEditPage() {
               </option>
             ))}
           </select>
-          {(errors.category_id || serverErrors.category_id) && (
-            <p className="text-red-500 text-xs mt-1" data-testid="error-category_id">
+          {Boolean(getFieldError('category_id')) && (
+            <p className="text-status-danger text-xs mt-1" data-testid="error-category_id">
               {getFieldError('category_id')}
             </p>
           )}
@@ -305,8 +305,8 @@ export function AdminProductEditPage() {
             className="border rounded p-2 text-sm w-full"
             data-testid="input-colors"
           />
-          {(errors.colors || serverErrors.colors || serverErrors['colors.0']) && (
-            <p className="text-red-500 text-xs mt-1" data-testid="error-colors">
+          {Boolean(getFieldError('colors')) && (
+            <p className="text-status-danger text-xs mt-1" data-testid="error-colors">
               {getFieldError('colors')}
             </p>
           )}
@@ -319,8 +319,8 @@ export function AdminProductEditPage() {
             className="border rounded p-2 text-sm w-full"
             data-testid="input-sizes"
           />
-          {(errors.sizes || serverErrors.sizes || serverErrors['sizes.0']) && (
-            <p className="text-red-500 text-xs mt-1" data-testid="error-sizes">
+          {Boolean(getFieldError('sizes')) && (
+            <p className="text-status-danger text-xs mt-1" data-testid="error-sizes">
               {getFieldError('sizes')}
             </p>
           )}
@@ -338,8 +338,8 @@ export function AdminProductEditPage() {
             />
             نشط
           </label>
-          {(errors.is_active || serverErrors.is_active) && (
-            <p className="text-red-500 text-xs mt-1" data-testid="error-is_active">
+          {Boolean(getFieldError('is_active')) && (
+            <p className="text-status-danger text-xs mt-1" data-testid="error-is_active">
               {getFieldError('is_active')}
             </p>
           )}
@@ -362,8 +362,8 @@ export function AdminProductEditPage() {
             onDelete={onDeleteImage}
             onReorder={onReorderImages}
           />
-          {(serverErrors.images || serverErrors['images.0']) && (
-            <p className="text-red-500 text-xs mt-1" data-testid="images-error">
+          {Boolean(getFieldError('images')) && (
+            <p className="text-status-danger text-xs mt-1" data-testid="images-error">
               {getFieldError('images')}
             </p>
           )}
@@ -372,7 +372,12 @@ export function AdminProductEditPage() {
         <div className="flex gap-2 mt-2">
           <Button
             type="submit"
-            disabled={createP.isPending || updateP.isPending || appendImgs.isPending}
+            disabled={
+              createP.isPending ||
+              updateP.isPending ||
+              appendImgs.isPending ||
+              !!successMsg
+            }
             data-testid="submit-product"
           >
             {createP.isPending || updateP.isPending || appendImgs.isPending

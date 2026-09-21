@@ -108,6 +108,8 @@ export const useAppendImages = () => {
     onSuccess: (_data, { id }) => {
       qc.invalidateQueries({ queryKey: productKeys.detail(id.toString()) })
       qc.invalidateQueries({ queryKey: productKeys.lists() })
+      qc.invalidateQueries({ queryKey: adminProductKeys.all })
+      qc.invalidateQueries({ queryKey: adminProductKeys.detail(id) })
     },
   })
 }
@@ -120,6 +122,8 @@ export const useDeleteImage = () => {
     onSuccess: (_data, { productId }) => {
       qc.invalidateQueries({ queryKey: productKeys.detail(productId.toString()) })
       qc.invalidateQueries({ queryKey: productKeys.lists() })
+      qc.invalidateQueries({ queryKey: adminProductKeys.all })
+      qc.invalidateQueries({ queryKey: adminProductKeys.detail(productId) })
     },
   })
 }
@@ -131,6 +135,8 @@ export const useReorderImages = () => {
       productsApi.reorderImages(id, ids),
     onSuccess: (_data, { id }) => {
       qc.invalidateQueries({ queryKey: productKeys.detail(id.toString()) })
+      qc.invalidateQueries({ queryKey: adminProductKeys.all })
+      qc.invalidateQueries({ queryKey: adminProductKeys.detail(id) })
     },
   })
 }
