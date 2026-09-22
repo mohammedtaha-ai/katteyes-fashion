@@ -33,9 +33,9 @@ To ensure the design system remains brand-agnostic and easily maintainable, comp
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
 
-    /* Brand Primary (Katteyes Luxury Amber Canonical #D97706) */
-    --primary: 32 95% 44%;
-    --primary-foreground: 222 47% 11%;   /* Near-black text satisfies WCAG AA with ~5.6:1 contrast ratio */
+    /* Brand Primary (Canonical Hex: #D97706) */
+    --primary: 32.13 94.62% 43.73%;
+    --primary-foreground: 222 47% 11%;   /* Near-black text satisfies WCAG AA: ~5.2:1 contrast ratio */
 
     /* Secondary & Muted */
     --secondary: 210 40% 96.1%;
@@ -45,32 +45,32 @@ To ensure the design system remains brand-agnostic and easily maintainable, comp
     --accent: 38 92% 95%;
     --accent-foreground: 38 92% 35%;
 
-    /* Destructive (Standard shadcn convention, calibrated for WCAG AA >= 4.5:1) */
-    --destructive: 0 72% 51%;           /* #DC2626 Red */
-    --destructive-foreground: 0 0% 100%; /* White on #DC2626 yields 5.5:1 contrast */
+    /* Destructive (Canonical Hex: #DC2626) */
+    --destructive: 0 72.22% 50.59%;
+    --destructive-foreground: 0 0% 100%; /* White on #DC2626 satisfies WCAG AA: 5.5:1 contrast */
 
-    /* Status Semantics (all foreground pairs calibrated for WCAG AA >= 4.5:1) */
-    --success: 142 76% 36%;              /* #15803D Emerald 700 */
-    --success-foreground: 0 0% 100%;     /* White on #15803D yields 5.25:1 contrast */
-    --warning: 38 92% 50%;               /* #F59E0B Amber 500 */
-    --warning-foreground: 222 47% 11%;   /* Near-black on #F59E0B yields 7.2:1 contrast */
-    --info: 199 89% 38%;                 /* #0284C7 Sky 700 */
-    --info-foreground: 0 0% 100%;        /* White on #0284C7 yields 4.8:1 contrast */
+    /* Status Semantics (Source of truth is canonical Hex, verified WCAG AA >= 4.5:1) */
+    --success: 142.43 71.81% 29.22%;     /* Canonical Hex: #15803D (White contrast: 5.04:1) */
+    --success-foreground: 0 0% 100%;
+    --warning: 37.69 92.13% 50.20%;      /* Canonical Hex: #F59E0B (Near-black contrast: 7.55:1) */
+    --warning-foreground: 222 47% 11%;
+    --info: 201.27 96.34% 32.16%;        /* Canonical Hex: #0369A1 (White contrast: 5.95:1) */
+    --info-foreground: 0 0% 100%;
 
     /* Dedicated Sidebar Tokens (isolated customization for Phase 1B) */
     --sidebar-background: 0 0% 100%;
     --sidebar-foreground: 222 47% 11%;
-    --sidebar-primary: 32 95% 44%;
+    --sidebar-primary: 32.13 94.62% 43.73%;
     --sidebar-primary-foreground: 222 47% 11%;
     --sidebar-accent: 210 40% 96.1%;
     --sidebar-accent-foreground: 222 47% 11.2%;
     --sidebar-border: 214.3 31.8% 91.4%;
-    --sidebar-ring: 32 95% 44%;
+    --sidebar-ring: 32.13 94.62% 43.73%;
 
     /* Borders & Inputs */
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 32 95% 44%;
+    --ring: 32.13 94.62% 43.73%;
 
     /* Geometry */
     --radius: 1rem;                     /* 16px default card radius */
@@ -79,7 +79,7 @@ To ensure the design system remains brand-agnostic and easily maintainable, comp
 ```
 
 ### 2.2 Configuration (`components.json`)
-A standard `components.json` is created in the project root of `web/` using the current `new-york` style, `zinc` baseColor, and `lucide` icon library, compatible with Vite, React 19, and Tailwind CSS:
+A standard `components.json` is created in the project root of `web/` using the current `new-york` style, `zinc` baseColor, `"rtl": true`, and `lucide` icon library, compatible with Vite, React 19, and Tailwind CSS:
 
 ```json
 {
@@ -87,6 +87,7 @@ A standard `components.json` is created in the project root of `web/` using the 
   "style": "new-york",
   "rsc": false,
   "tsx": true,
+  "rtl": true,
   "tailwind": {
     "config": "tailwind.config.js",
     "css": "src/index.css",
