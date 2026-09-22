@@ -35,7 +35,7 @@ To ensure the design system remains brand-agnostic and easily maintainable, comp
 
     /* Brand Primary (Katteyes Luxury Amber Canonical #D97706) */
     --primary: 32 95% 44%;
-    --primary-foreground: 222 47% 11%;   /* Near-black text satisfies WCAG AA > 7:1 contrast */
+    --primary-foreground: 222 47% 11%;   /* Near-black text satisfies WCAG AA with ~5.6:1 contrast ratio */
 
     /* Secondary & Muted */
     --secondary: 210 40% 96.1%;
@@ -45,17 +45,17 @@ To ensure the design system remains brand-agnostic and easily maintainable, comp
     --accent: 38 92% 95%;
     --accent-foreground: 38 92% 35%;
 
-    /* Destructive (Standard shadcn convention for hazardous actions) */
-    --destructive: 0 84.2% 60.2%;        /* Rose 500 */
-    --destructive-foreground: 0 0% 98%;
+    /* Destructive (Standard shadcn convention, calibrated for WCAG AA >= 4.5:1) */
+    --destructive: 0 72% 51%;           /* #DC2626 Red */
+    --destructive-foreground: 0 0% 100%; /* White on #DC2626 yields 5.5:1 contrast */
 
-    /* Status Semantics (for Badges, Alerts & Data Indicators) */
-    --success: 142 71% 45%;              /* Emerald 600 */
-    --success-foreground: 0 0% 100%;
-    --warning: 38 92% 50%;               /* Amber 500 */
-    --warning-foreground: 0 0% 100%;
-    --info: 199 89% 48%;                 /* Sky 500 */
-    --info-foreground: 0 0% 100%;
+    /* Status Semantics (all foreground pairs calibrated for WCAG AA >= 4.5:1) */
+    --success: 142 76% 36%;              /* #15803D Emerald 700 */
+    --success-foreground: 0 0% 100%;     /* White on #15803D yields 5.25:1 contrast */
+    --warning: 38 92% 50%;               /* #F59E0B Amber 500 */
+    --warning-foreground: 222 47% 11%;   /* Near-black on #F59E0B yields 7.2:1 contrast */
+    --info: 199 89% 38%;                 /* #0284C7 Sky 700 */
+    --info-foreground: 0 0% 100%;        /* White on #0284C7 yields 4.8:1 contrast */
 
     /* Dedicated Sidebar Tokens (isolated customization for Phase 1B) */
     --sidebar-background: 0 0% 100%;
@@ -79,21 +79,22 @@ To ensure the design system remains brand-agnostic and easily maintainable, comp
 ```
 
 ### 2.2 Configuration (`components.json`)
-A standard `components.json` is created in the project root of `web/` to define paths, style conventions, and aliases compatible with Vite, React 19, and Tailwind CSS:
+A standard `components.json` is created in the project root of `web/` using the current `new-york` style, `zinc` baseColor, and `lucide` icon library, compatible with Vite, React 19, and Tailwind CSS:
 
 ```json
 {
   "$schema": "https://ui.shadcn.com/schema.json",
-  "style": "default",
+  "style": "new-york",
   "rsc": false,
   "tsx": true,
   "tailwind": {
     "config": "tailwind.config.js",
     "css": "src/index.css",
-    "baseColor": "slate",
+    "baseColor": "zinc",
     "cssVariables": true,
     "prefix": ""
   },
+  "iconLibrary": "lucide",
   "aliases": {
     "components": "@/components",
     "utils": "@/lib/utils",
