@@ -30,12 +30,15 @@ function wrap(initial: string) {
 it('renders product name + price + slider + options from MSW', async () => {
   wrap('/products/red-dress')
   await waitFor(() =>
-    expect(screen.getByText('فستان أحمر')).toBeInTheDocument(),
+    expect(screen.getAllByText('فستان أحمر')[0]).toBeInTheDocument(),
   )
   expect(screen.getByTestId('detail-price')).toBeInTheDocument()
   expect(screen.getByTestId('product-slider')).toBeInTheDocument()
   expect(screen.getByTestId('opt-أحمر')).toBeInTheDocument()
   expect(screen.getByTestId('opt-أحمر').className).toMatch(/bg-black/)
+  expect(screen.getByTestId('back-button')).toBeInTheDocument()
+  expect(screen.getByTestId('whatsapp-order-btn')).toBeInTheDocument()
+  expect(screen.getByTestId('product-reviews-section')).toBeInTheDocument()
 })
 
 it('shows fallback message when product not found', async () => {
