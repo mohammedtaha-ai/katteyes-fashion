@@ -101,6 +101,7 @@ export function AdminProductEditPage() {
     fd.append('currency', data.currency)
     fd.append('is_active', data.is_active ? '1' : '0')
     fd.append('category_id', String(data.category_id))
+    fd.append('sync_options', '1')
     ;(data.colors ?? '')
       .split(',')
       .map((c) => c.trim())

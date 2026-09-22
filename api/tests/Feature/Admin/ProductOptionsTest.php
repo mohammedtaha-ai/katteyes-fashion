@@ -157,4 +157,58 @@ class ProductOptionsTest extends TestCase
         $this->assertEqualsCanonicalizing(['وردي', 'بنفسجي'], $data['colors']);
         $this->assertEqualsCanonicalizing(['S', 'M'], $data['sizes']);
     }
+
+    public function test_update_with_sync_options_and_no_options_clears_all_existing_options(): void
+    {
+        $category = Category::factory()->create();
+        $product = Product::factory()->create(['category_id' => $category->id]);
+        $product->options()->create(['type' => 'color', 'value' => 'أزرق', 'sort_order' => 0]);
+        $product->options()->create(['type' => 'size', 'value' => 'S', 'sort_order' => 1]);
+
+        $this->assertDatabaseCount('product_options', 2);
+
+        $response = $this->post("/api/v1/admin/products/{$product->id}", [
+            '_method' => 'PUT',
+            'name' => $product->name,
+            'price' => $product->price,
+            'currency' => $product->currency,
+            'category_id' => $category->id,
+            'sync_options' => '1',
+        ]);
+
+        $response->assertOk();
+
+        $this->assertDatabaseCount('product_options', 0);
+        $this->assertCount(0, $product->fresh()->options);
+    }
+
+    public function test_partial_update_preserves_existing_options(): void
+    {
+        $category = Category::factory()->create();
+        $product = Product::factory()->create(['category_id' => $category->id]);
+        $product->options()->create(['type' => 'color', 'value' => 'أزرق', 'sort_order' => 0]);
+        $product->options()->create(['type' => 'size', 'value' => 'S', 'sort_order' => 1]);
+
+        $this->assertDatabaseCount('product_options', 2);
+
+        $response = $this->post("/api/v1/admin/products/{$product->id}", [
+            '_method' => 'PUT',
+            'is_active' => 0,
+        ]);
+
+        $response->assertOk();
+
+        $this->assertDatabaseCount('product_options', 2);
+        $this->assertDatabaseHas('product_options', [
+            'product_id' => $product->id,
+            'type' => 'color',
+            'value' => 'أزرق',
+        ]);
+        $this->assertDatabaseHas('product_options', [
+            'product_id' => $product->id,
+            'type' => 'size',
+            'value' => 'S',
+        ]);
+        $this->assertFalse((bool) $product->fresh()->is_active);
+    }
 }
