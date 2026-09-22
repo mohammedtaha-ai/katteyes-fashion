@@ -13,7 +13,7 @@ class ProductController extends Controller
     {
         $q = Product::query()
             ->where('is_active', true)
-            ->with('category');
+            ->with(['category', 'images', 'options']);
 
         if ($slug = $request->query('category')) {
             $q->whereHas('category', fn ($qq) => $qq->where('slug', $slug)->where('is_active', true));

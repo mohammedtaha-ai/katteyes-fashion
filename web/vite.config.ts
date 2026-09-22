@@ -13,4 +13,20 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  server: {
+    host: '0.0.0.0',
+    watch: {
+      usePolling: true,
+    },
+    proxy: {
+      '/api': {
+        target: 'http://api:8000',
+        changeOrigin: true,
+      },
+      '/storage': {
+        target: 'http://api:8000',
+        changeOrigin: true,
+      },
+    },
+  },
 })
