@@ -5,7 +5,7 @@ RUN apt-get update && apt-get install -y \
  && docker-php-ext-configure gd --with-jpeg --with-webp \
  && docker-php-ext-install pdo_mysql gd zip bcmath opcache \
  && pecl install redis && docker-php-ext-enable redis \
- && echo "zend_extension=opcache\nopcache.enable=1\nopcache.enable_cli=1\nopcache.memory_consumption=256\nopcache.interned_strings_buffer=16\nopcache.max_accelerated_files=20000\nopcache.validate_timestamps=1\nopcache.revalidate_freq=0" > /usr/local/etc/php/conf.d/docker-php-ext-opcache.ini \
+ && echo "zend_extension=opcache\nopcache.enable=1\nopcache.enable_cli=1\nopcache.memory_consumption=512\nopcache.interned_strings_buffer=64\nopcache.max_accelerated_files=30000\nopcache.validate_timestamps=1\nopcache.revalidate_freq=60\nopcache.fast_shutdown=1" > /usr/local/etc/php/conf.d/docker-php-ext-opcache.ini \
  && rm -rf /var/lib/apt/lists/*
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
