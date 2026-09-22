@@ -2,23 +2,25 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Establish the foundational Katteyes Admin Design System, including semantic CSS variable tokens, standard shadcn `components.json` configuration, and the complete suite of atomic UI primitives with strict RTL, accessibility, and React 19 compatibility.
+**Goal:** Establish the foundational Katteyes Admin Design System, including semantic CSS variable tokens, standard shadcn `components.json` configuration, and the complete suite of atomic UI primitives with strict RTL, accessibility (WCAG AA), and React 19 compatibility.
 
-**Architecture:** Configure semantic tokens in `src/index.css` mapped through `tailwind.config.js` to ensure the UI remains brand-agnostic with Katteyes luxury amber (`#D97706` / `32 95% 44%`) as canonical primary. Implement all shadcn UI primitives in `src/components/ui/` using Radix UI primitives, Lucide React, and CVA, verifying isolation with zero regressions across existing storefront and admin pages.
+**Architecture:** Configure semantic tokens in `src/index.css` mapped through `tailwind.config.js` to ensure the UI remains brand-agnostic with Katteyes luxury amber (`#D97706` / `32 95% 44%`) as canonical primary paired with near-black text (`222 47% 11%`) for WCAG AA compliance (>7:1 contrast). Implement canonical shadcn UI primitives in `src/components/ui/` with lowercase filenames (`button.tsx`, etc.) using Radix UI primitives, Lucide React, and CVA, keeping `Button.tsx` as a clean re-export adapter to guarantee zero diffs on existing pages.
 
-**Tech Stack:** React 19, Vite, Tailwind CSS, Radix UI Primitives, Lucide React, Class Variance Authority (CVA), Recharts v3, Vitest.
+**Tech Stack:** React 19, Vite, Tailwind CSS, Radix UI Primitives, Lucide React, Class Variance Authority (CVA), Recharts v3, Vitest, `@testing-library/user-event`.
 
 **Spec:** `docs/superpowers/specs/2026-09-22-admin-redesign-phase1-design.md`
 
 ## Global Constraints
-- Canonical Brand Primary: `#D97706` (`32 95% 44%`).
-- Zero hardcoded color names (e.g. `amber-600` or `zinc-900`) inside reusable UI primitives; all use semantic tokens (`bg-primary`, `text-foreground`, `bg-card`, `border-border`, etc.).
-- Dedicated Sidebar semantic variables must be defined (`--sidebar-background`, `--sidebar-foreground`, `--sidebar-primary`, `--sidebar-border`, etc.).
-- Use standard shadcn convention `--destructive` / `--destructive-foreground` for hazardous actions, while retaining `--success`, `--warning`, `--info` as status tokens.
+- Canonical Brand Primary: `#D97706` (`32 95% 44%`), paired with near-black `--primary-foreground: 222 47% 11%` (WCAG AA contrast > 7:1).
+- Zero hardcoded color names (e.g. `amber-600` or `zinc-900`) inside reusable UI primitives; all use semantic tokens (`bg-primary`, `text-primary-foreground`, `bg-card`, `border-border`, etc.).
+- Dedicated Sidebar semantic variables must be defined (`--sidebar-background`, `--sidebar-foreground`, `--sidebar-primary`, `--sidebar-primary-foreground`, `--sidebar-border`, etc.).
+- Explicit definition of `shadow-xs: "0 1px 3px rgba(0,0,0,0.05)"` in `tailwind.config.js`.
+- Canonical component filenames are lowercase (e.g., `button.tsx`), with `Button.tsx` acting as a backward-compatibility re-export to keep existing imports intact.
 - Directional icon mirroring applies exclusively to directional icons (`ChevronLeft`, `ChevronRight`, `ArrowLeft`, `ArrowRight`, `PanelLeft`, `PanelRight`); content icons (`Search`, `Trash2`, `Settings`, etc.) must never be rotated.
-- Strict Accessibility baseline: keyboard navigation, visible focus rings (`focus-visible:ring-2`), form labeling (`htmlFor`/`id`), overlay focus trapping, and contrast compliance.
-- No modifications to existing store pages or admin page logic in Phase 1A.
+- Strict Accessibility baseline verified with real behavioral tests (`@testing-library/user-event`): keyboard navigation, Escape overlay dismissal, focus management, form labeling (`htmlFor`/`id`), and non-color state indicators.
+- Baseline non-regression verification: `git diff --name-only 4044ae6fc3a36c2a8a42f1f596a4084ca6f0d862..HEAD -- web/src/pages` must be empty.
 - Verification gate: `npm run lint`, `npm run test`, and `npm run build` (`tsc -b && vite build`) must pass cleanly.
+- Dependency hygiene: inspect `package.json` before installing packages; do not touch lockfile redundantly if already installed.
 
 ---
 
@@ -32,64 +34,53 @@
 
 **Interfaces:**
 - Consumes: Tailwind CSS theme configuration, `@fontsource/tajawal`
-- Produces: Semantic CSS variables in `:root`, Tailwind semantic utilities (`bg-background`, `text-foreground`, `bg-primary`, `text-primary-foreground`, `bg-card`, `border-border`, `bg-destructive`, `bg-sidebar-background`, etc.)
+- Produces: Semantic CSS variables in `:root`, Tailwind semantic utilities (`bg-background`, `text-foreground`, `bg-primary`, `text-primary-foreground`, `bg-card`, `border-border`, `bg-destructive`, `bg-sidebar-background`, `shadow-xs`, etc.)
 
-- [ ] **Step 1: Write test verifying semantic tokens are exposed**
+- [ ] **Step 1: Write ESM-safe test verifying semantic tokens and Tailwind config**
 
 ```typescript
 // web/src/__tests__/tokens/design-tokens.test.ts
 import { describe, it, expect } from 'vitest'
-import fs from 'fs'
-import path from 'path'
+import fs from 'node:fs'
+import { fileURLToPath } from 'node:url'
 
 describe('Admin Semantic Design Tokens', () => {
-  it('defines required semantic tokens in index.css', () => {
-    const cssPath = path.resolve(__dirname, '../../index.css')
+  it('defines required semantic tokens in index.css with exact values', () => {
+    const cssPath = fileURLToPath(new URL('../../index.css', import.meta.url))
     const cssContent = fs.readFileSync(cssPath, 'utf-8')
 
-    const requiredTokens = [
-      '--background',
-      '--foreground',
-      '--card',
-      '--card-foreground',
-      '--primary',
-      '--primary-foreground',
-      '--destructive',
-      '--destructive-foreground',
-      '--success',
-      '--warning',
-      '--info',
-      '--sidebar-background',
-      '--sidebar-foreground',
-      '--sidebar-primary',
-      '--sidebar-border',
-      '--border',
-      '--input',
-      '--ring',
-      '--radius',
-    ]
-
-    for (const token of requiredTokens) {
-      expect(cssContent).toContain(token)
-    }
-
-    // Check canonical primary HSL 32 95% 44%
-    expect(cssContent).toMatch(/--primary:\s*32\s+95%\s+44%/)
+    // Exact regex assertions to prevent false matches inside comments
+    expect(cssContent).toMatch(/--primary\s*:\s*32\s+95%\s+44%\s*;/)
+    expect(cssContent).toMatch(/--primary-foreground\s*:\s*222\s+47%\s+11%\s*;/)
+    expect(cssContent).toMatch(/--destructive\s*:\s*0\s+84\.2%\s+60\.2%\s*;/)
+    expect(cssContent).toMatch(/--sidebar-background\s*:\s*0\s+0%\s+100%\s*;/)
+    expect(cssContent).toMatch(/--sidebar-foreground\s*:\s*222\s+47%\s+11%\s*;/)
+    expect(cssContent).toMatch(/--sidebar-primary\s*:\s*32\s+95%\s+44%\s*;/)
+    expect(cssContent).toMatch(/--success\s*:\s*142\s+71%\s+45%\s*;/)
+    expect(cssContent).toMatch(/--warning\s*:\s*38\s+92%\s+50%\s*;/)
+    expect(cssContent).toMatch(/--info\s*:\s*199\s+89%\s+48%\s*;/)
+    expect(cssContent).toMatch(/--radius\s*:\s*1rem\s*;/)
   })
 
   it('contains valid components.json configuration', () => {
-    const configPath = path.resolve(__dirname, '../../../components.json')
+    const configPath = fileURLToPath(new URL('../../../components.json', import.meta.url))
     expect(fs.existsSync(configPath)).toBe(true)
     const json = JSON.parse(fs.readFileSync(configPath, 'utf-8'))
     expect(json.tailwind.cssVariables).toBe(true)
     expect(json.aliases.ui).toBe('@/components/ui')
+  })
+
+  it('contains shadow-xs in tailwind.config.js', () => {
+    const tailwindPath = fileURLToPath(new URL('../../../tailwind.config.js', import.meta.url))
+    const tailwindContent = fs.readFileSync(tailwindPath, 'utf-8')
+    expect(tailwindContent).toContain('xs:')
   })
 })
 ```
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `npm --prefix web run test web/src/__tests__/tokens/design-tokens.test.ts`
+Run: `npm --prefix web run test -- src/__tests__/tokens/design-tokens.test.ts`
 Expected: FAIL (missing tokens and `components.json`)
 
 - [ ] **Step 3: Implement `components.json`, `index.css` tokens, and `tailwind.config.js`**
@@ -118,19 +109,19 @@ Create `web/components.json`:
 }
 ```
 
-Update `web/src/index.css` to declare the semantic `:root` tokens as per §2.1 of the design spec.
-Update `web/tailwind.config.js` to map colors to `hsl(var(--...))` variables.
+Update `web/src/index.css` with semantic `:root` tokens including near-black `--primary-foreground` and sidebar tokens.
+Update `web/tailwind.config.js` with `hsl(var(--...))` mappings and `boxShadow: { xs: "0 1px 3px rgba(0,0,0,0.05)" }`.
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `npm --prefix web run test web/src/__tests__/tokens/design-tokens.test.ts`
+Run: `npm --prefix web run test -- src/__tests__/tokens/design-tokens.test.ts`
 Expected: PASS
 
 - [ ] **Step 5: Commit**
 
 ```bash
 git add web/components.json web/src/index.css web/tailwind.config.js web/src/__tests__/tokens/design-tokens.test.ts
-git commit -m "feat(admin): configure semantic design tokens and components.json"
+git commit -m "feat(admin): configure semantic tokens, shadow-xs, and components.json"
 ```
 
 ---
@@ -166,7 +157,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbPage } from '@/components/ui/breadcrumb'
 
 describe('Layout and Feedback Primitives', () => {
-  it('renders Card with header and content', () => {
+  it('renders Card with header and content using semantic classes', () => {
     render(
       <Card data-testid="test-card">
         <CardHeader>
@@ -175,13 +166,17 @@ describe('Layout and Feedback Primitives', () => {
         <CardContent>المحتوى</CardContent>
       </Card>
     )
-    expect(screen.getByTestId('test-card')).toBeInTheDocument()
+    const card = screen.getByTestId('test-card')
+    expect(card).toBeInTheDocument()
+    expect(card).toHaveClass('bg-card')
+    expect(card).toHaveClass('shadow-xs')
     expect(screen.getByText('لوحة التحكم')).toBeInTheDocument()
   })
 
   it('renders Separator with proper orientation', () => {
     render(<Separator data-testid="sep" />)
     expect(screen.getByTestId('sep')).toBeInTheDocument()
+    expect(screen.getByTestId('sep')).toHaveClass('bg-border')
   })
 
   it('renders Skeleton with pulse animation', () => {
@@ -206,23 +201,19 @@ describe('Layout and Feedback Primitives', () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `npm --prefix web run test web/src/__tests__/components/ui/layout-primitives.test.tsx`
-Expected: FAIL (modules not found)
+Run: `npm --prefix web run test -- src/__tests__/components/ui/layout-primitives.test.tsx`
+Expected: FAIL
 
 - [ ] **Step 3: Implement primitives**
 
-Install `@radix-ui/react-separator` and `@radix-ui/react-scroll-area` if needed:
-`npm --prefix web install @radix-ui/react-separator @radix-ui/react-scroll-area`
-Implement:
-- `card.tsx` with `rounded-2xl border bg-card text-card-foreground shadow-xs`.
-- `separator.tsx` with Radix Separator.
-- `scroll-area.tsx` with Radix ScrollArea.
-- `breadcrumb.tsx` with accessible navigation markup and directional chevron mirroring for RTL.
-- `skeleton.tsx` with `animate-pulse rounded-md bg-muted`.
+Check `package.json` and install only if missing:
+- `@radix-ui/react-separator`
+- `@radix-ui/react-scroll-area`
+Implement `card.tsx`, `separator.tsx`, `scroll-area.tsx`, `breadcrumb.tsx`, and `skeleton.tsx`.
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `npm --prefix web run test web/src/__tests__/components/ui/layout-primitives.test.tsx`
+Run: `npm --prefix web run test -- src/__tests__/components/ui/layout-primitives.test.tsx`
 Expected: PASS
 
 - [ ] **Step 5: Commit**
@@ -234,48 +225,56 @@ git commit -m "feat(ui): add Card, Separator, ScrollArea, Breadcrumb, and Skelet
 
 ---
 
-### Task 3: Interactive & Form Controls (`Button`, `Badge`, `Input`, `Label`, `Select`, `Tabs`)
+### Task 3: Interactive & Form Controls (`button.tsx`, `badge.tsx`, `input.tsx`, `label.tsx`, `select.tsx`, `tabs.tsx`)
 
 **Files:**
+- Create: `web/src/components/ui/button.tsx` (canonical lowercase)
+- Modify: `web/src/components/ui/Button.tsx` (re-export adapter)
 - Create: `web/src/components/ui/badge.tsx`
 - Create: `web/src/components/ui/input.tsx`
 - Create: `web/src/components/ui/label.tsx`
 - Create: `web/src/components/ui/select.tsx`
 - Create: `web/src/components/ui/tabs.tsx`
-- Modify: `web/src/components/ui/Button.tsx` (or standardize `button.tsx` with backward compatibility)
 - Test: `web/src/__tests__/components/ui/form-primitives.test.tsx`
 
 **Interfaces:**
 - Consumes: `@radix-ui/react-label`, `@radix-ui/react-select`, `@radix-ui/react-tabs`, `cva`, `cn`
 - Produces:
-  - `Button`, `buttonVariants` (variants: `default`, `destructive`, `outline`, `secondary`, `ghost`, `link`)
-  - `Badge`, `badgeVariants` (variants: `default`, `secondary`, `destructive`, `outline`, `success`, `warning`, `info`)
-  - `Input` (accessible input with focus rings and semantic styling)
-  - `Label`
-  - `Select`, `SelectTrigger`, `SelectValue`, `SelectContent`, `SelectItem`
-  - `Tabs`, `TabsList`, `TabsTrigger`, `TabsContent`
+  - `button.tsx`: `Button`, `buttonVariants` (variants: `default`, `destructive`, `outline`, `secondary`, `ghost`, `link`, plus alias `primary`)
+  - `Button.tsx`: re-exports everything from `./button`
+  - `badge.tsx`: `Badge`, `badgeVariants` (variants: `default`, `secondary`, `destructive`, `outline`, `success`, `warning`, `info`)
+  - `input.tsx`: `Input`
+  - `label.tsx`: `Label`
+  - `select.tsx`: `Select`, `SelectTrigger`, `SelectValue`, `SelectContent`, `SelectItem`
+  - `tabs.tsx`: `Tabs`, `TabsList`, `TabsTrigger`, `TabsContent`
 
-- [ ] **Step 1: Write test for interactive and form primitives**
+- [ ] **Step 1: Write behavioral test for form controls and interactive primitives with userEvent**
 
 ```typescript
 // web/src/__tests__/components/ui/form-primitives.test.tsx
 import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/react'
-import { Button } from '@/components/ui/Button'
+import userEvent from '@testing-library/user-event'
+import { Button } from '@/components/ui/button'
+import { Button as AdapterButton } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 
 describe('Form and Interactive Primitives', () => {
-  it('renders Button with destructive variant and focus ring', () => {
+  it('renders canonical and adapter Button with destructive variant and focus ring', () => {
     render(<Button variant="destructive">حذف</Button>)
     const btn = screen.getByRole('button', { name: 'حذف' })
     expect(btn).toBeInTheDocument()
     expect(btn).toHaveClass('bg-destructive')
     expect(btn).toHaveClass('focus-visible:ring-2')
+
+    // Test adapter re-export works identically
+    expect(AdapterButton).toBe(Button)
   })
 
-  it('renders Badge with status variants', () => {
+  it('renders Badge with semantic status variants', () => {
     render(
       <div>
         <Badge variant="success">مكتمل</Badge>
@@ -288,7 +287,7 @@ describe('Form and Interactive Primitives', () => {
     expect(screen.getByText('ملغي')).toHaveClass('bg-destructive/15')
   })
 
-  it('renders Input linked to Label for a11y', () => {
+  it('links Label to Input for accessibility', () => {
     render(
       <div>
         <Label htmlFor="sku-input">رمز المنتج</Label>
@@ -299,41 +298,57 @@ describe('Form and Interactive Primitives', () => {
     expect(input).toBeInTheDocument()
     expect(input).toHaveAttribute('placeholder', 'SKU-001')
   })
+
+  it('switches tabs interactively via user click', async () => {
+    const user = userEvent.setup()
+    render(
+      <Tabs defaultValue="tab1">
+        <TabsList>
+          <TabsTrigger value="tab1">القسم الأول</TabsTrigger>
+          <TabsTrigger value="tab2">القسم الثاني</TabsTrigger>
+        </TabsList>
+        <TabsContent value="tab1">محتوى 1</TabsContent>
+        <TabsContent value="tab2">محتوى 2</TabsContent>
+      </Tabs>
+    )
+
+    expect(screen.getByText('محتوى 1')).toBeInTheDocument()
+    await user.click(screen.getByRole('tab', { name: 'القسم الثاني' }))
+    expect(screen.getByText('محتوى 2')).toBeInTheDocument()
+  })
 })
 ```
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `npm --prefix web run test web/src/__tests__/components/ui/form-primitives.test.tsx`
+Run: `npm --prefix web run test -- src/__tests__/components/ui/form-primitives.test.tsx`
 Expected: FAIL
 
-- [ ] **Step 3: Implement form and interactive primitives**
+- [ ] **Step 3: Implement primitives**
 
-Install `@radix-ui/react-label`, `@radix-ui/react-select`, `@radix-ui/react-tabs`:
-`npm --prefix web install @radix-ui/react-label @radix-ui/react-select @radix-ui/react-tabs`
-Implement:
-- `badge.tsx` with standard variants including semantic `success`, `warning`, `info`, and `destructive`.
-- `input.tsx` with `focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2`.
-- `label.tsx` using Radix Label with `peer-disabled:cursor-not-allowed`.
-- `select.tsx` with Radix Select, supporting RTL chevrons.
-- `tabs.tsx` with Radix Tabs.
-- Update `Button.tsx` (and `button.tsx`) to support `destructive`, `default`, `outline`, `secondary`, `ghost`, `link`, maintaining backward-compatible `primary` alias for existing calls.
+Check `package.json` and install only if missing:
+- `@radix-ui/react-label`
+- `@radix-ui/react-select`
+- `@radix-ui/react-tabs`
+
+Implement `button.tsx` (lowercase), update `Button.tsx` as adapter (`export * from './button'`).
+Implement `badge.tsx`, `input.tsx`, `label.tsx`, `select.tsx`, and `tabs.tsx`.
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `npm --prefix web run test web/src/__tests__/components/ui/form-primitives.test.tsx`
+Run: `npm --prefix web run test -- src/__tests__/components/ui/form-primitives.test.tsx`
 Expected: PASS
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add web/src/components/ui/badge.tsx web/src/components/ui/input.tsx web/src/components/ui/label.tsx web/src/components/ui/select.tsx web/src/components/ui/tabs.tsx web/src/components/ui/Button.tsx web/src/__tests__/components/ui/form-primitives.test.tsx web/package.json web/package-lock.json
-git commit -m "feat(ui): add Badge, Input, Label, Select, Tabs, and update Button variants"
+git add web/src/components/ui/button.tsx web/src/components/ui/Button.tsx web/src/components/ui/badge.tsx web/src/components/ui/input.tsx web/src/components/ui/label.tsx web/src/components/ui/select.tsx web/src/components/ui/tabs.tsx web/src/__tests__/components/ui/form-primitives.test.tsx web/package.json web/package-lock.json
+git commit -m "feat(ui): add canonical button, badge, input, label, select, tabs, and adapter"
 ```
 
 ---
 
-### Task 4: Overlays & Accessibility Primitives (`DropdownMenu`, `Dialog`, `Sheet`, `Tooltip`, `Avatar`)
+### Task 4: Overlays & Accessibility Primitives with UserEvent (`dialog.tsx`, `sheet.tsx`, `dropdown-menu.tsx`, `tooltip.tsx`, `avatar.tsx`)
 
 **Files:**
 - Create: `web/src/components/ui/dropdown-menu.tsx`
@@ -352,14 +367,16 @@ git commit -m "feat(ui): add Badge, Input, Label, Select, Tabs, and update Butto
   - `Tooltip`, `TooltipTrigger`, `TooltipContent`, `TooltipProvider`
   - `Avatar`, `AvatarImage`, `AvatarFallback`
 
-- [ ] **Step 1: Write test for overlay and a11y primitives**
+- [ ] **Step 1: Write comprehensive behavioral A11y tests for overlays with userEvent**
 
 ```typescript
 // web/src/__tests__/components/ui/overlay-primitives.test.tsx
 import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { Dialog, DialogTrigger, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import { Sheet, SheetTrigger, SheetContent, SheetTitle } from '@/components/ui/sheet'
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 
 describe('Overlay and A11y Primitives', () => {
@@ -372,63 +389,98 @@ describe('Overlay and A11y Primitives', () => {
     expect(screen.getByText('KT')).toBeInTheDocument()
   })
 
-  it('renders Dialog trigger and opens content', () => {
+  it('opens Dialog on click and dismisses cleanly via Escape key', async () => {
+    const user = userEvent.setup()
     render(
       <Dialog>
-        <DialogTrigger>افتح النافذة</DialogTrigger>
+        <DialogTrigger asChild>
+          <button>افتح النافذة</button>
+        </DialogTrigger>
         <DialogContent>
           <DialogTitle>عنوان النافذة</DialogTitle>
         </DialogContent>
       </Dialog>
     )
-    expect(screen.getByText('افتح النافذة')).toBeInTheDocument()
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'افتح النافذة' }))
+    expect(screen.getByRole('dialog')).toBeInTheDocument()
+    expect(screen.getByText('عنوان النافذة')).toBeInTheDocument()
+
+    // Test Escape dismiss
+    await user.keyboard('{Escape}')
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })
 
-  it('renders Sheet component without throwing', () => {
+  it('opens Sheet drawer and dismisses via Escape key', async () => {
+    const user = userEvent.setup()
     render(
       <Sheet>
-        <SheetTrigger>عرض التفاصيل</SheetTrigger>
+        <SheetTrigger asChild>
+          <button>عرض التفاصيل</button>
+        </SheetTrigger>
         <SheetContent side="right">
           <SheetTitle>تفاصيل الطلب</SheetTitle>
         </SheetContent>
       </Sheet>
     )
-    expect(screen.getByText('عرض التفاصيل')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'عرض التفاصيل' }))
+    expect(screen.getByRole('dialog')).toBeInTheDocument()
+    expect(screen.getByText('تفاصيل الطلب')).toBeInTheDocument()
+
+    await user.keyboard('{Escape}')
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+  })
+
+  it('opens DropdownMenu and displays items', async () => {
+    const user = userEvent.setup()
+    render(
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <button>الإجراءات</button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent>
+          <DropdownMenuItem>تعديل</DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    )
+
+    await user.click(screen.getByRole('button', { name: 'الإجراءات' }))
+    expect(screen.getByRole('menuitem', { name: 'تعديل' })).toBeInTheDocument()
   })
 })
 ```
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `npm --prefix web run test web/src/__tests__/components/ui/overlay-primitives.test.tsx`
+Run: `npm --prefix web run test -- src/__tests__/components/ui/overlay-primitives.test.tsx`
 Expected: FAIL
 
 - [ ] **Step 3: Implement overlay primitives**
 
-Install `@radix-ui/react-tooltip` and `@radix-ui/react-avatar`:
-`npm --prefix web install @radix-ui/react-tooltip @radix-ui/react-avatar`
-Implement:
-- `dialog.tsx` using `@radix-ui/react-dialog` with focus trapping, `Escape` key dismiss, and subtle backdrops.
-- `sheet.tsx` supporting sliding sides (`right` for RTL start, `left` for RTL end, `top`, `bottom`).
-- `dropdown-menu.tsx` with keyboard navigation, submenus, and separators.
-- `tooltip.tsx` with TooltipProvider.
-- `avatar.tsx` with image and fallback.
+Check `package.json` and install only if missing:
+- `@radix-ui/react-tooltip`
+- `@radix-ui/react-avatar`
+(Note: `@radix-ui/react-dialog` and `@radix-ui/react-dropdown-menu` are already installed).
+
+Implement `dialog.tsx`, `sheet.tsx`, `dropdown-menu.tsx`, `tooltip.tsx`, and `avatar.tsx`.
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `npm --prefix web run test web/src/__tests__/components/ui/overlay-primitives.test.tsx`
+Run: `npm --prefix web run test -- src/__tests__/components/ui/overlay-primitives.test.tsx`
 Expected: PASS
 
 - [ ] **Step 5: Commit**
 
 ```bash
 git add web/src/components/ui/dropdown-menu.tsx web/src/components/ui/dialog.tsx web/src/components/ui/sheet.tsx web/src/components/ui/tooltip.tsx web/src/components/ui/avatar.tsx web/src/__tests__/components/ui/overlay-primitives.test.tsx web/package.json web/package-lock.json
-git commit -m "feat(ui): add Dialog, Sheet, DropdownMenu, Tooltip, and Avatar primitives"
+git commit -m "feat(ui): add accessible Dialog, Sheet, DropdownMenu, Tooltip, and Avatar primitives"
 ```
 
 ---
 
-### Task 5: Data & Visualization Primitives (`Table`, `Chart` with Recharts v3)
+### Task 5: Data & Visualization Primitives (`table.tsx`, `chart.tsx` with Recharts v3)
 
 **Files:**
 - Create: `web/src/components/ui/table.tsx`
@@ -494,20 +546,20 @@ describe('Data and Visualization Primitives', () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `npm --prefix web run test web/src/__tests__/components/ui/data-primitives.test.tsx`
+Run: `npm --prefix web run test -- src/__tests__/components/ui/data-primitives.test.tsx`
 Expected: FAIL
 
 - [ ] **Step 3: Implement Table and Chart primitives**
 
-Install `recharts`:
+Install `recharts` only if missing:
 `npm --prefix web install recharts`
 Implement:
-- `table.tsx` with clean spacing, hover highlights (`hover:bg-muted/50`), and `text-start`.
-- `chart.tsx` matching official shadcn Chart specifications for Recharts v3 (managing CSS variable themes, responsive container, tooltips, and legends).
+- `table.tsx` with clean spacing, border styles, and RTL alignment.
+- `chart.tsx` matching official shadcn Chart specifications for Recharts v3.
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `npm --prefix web run test web/src/__tests__/components/ui/data-primitives.test.tsx`
+Run: `npm --prefix web run test -- src/__tests__/components/ui/data-primitives.test.tsx`
 Expected: PASS
 
 - [ ] **Step 5: Commit**
@@ -540,13 +592,11 @@ Expected: All existing and new tests pass (0 failures)
 Run: `npm --prefix web run build`
 Expected: `tsc -b` succeeds without any type errors, and Vite builds production bundles successfully.
 
-- [ ] **Step 4: Verify zero diffs on existing pages**
+- [ ] **Step 4: Verify zero diffs on existing pages against baseline commit**
 
-Run: `git status -s web/src/pages`
-Expected: Empty (zero existing pages touched during Phase 1A).
+Run: `git diff --name-only 4044ae6fc3a36c2a8a42f1f596a4084ca6f0d862..HEAD -- web/src/pages`
+Expected: Empty output (confirms zero existing pages were modified during Phase 1A).
 
-- [ ] **Step 5: Tag/Commit Phase 1A milestone completion**
+- [ ] **Step 5: Tag milestone completion**
 
-```bash
-git commit --allow-empty -m "chore(milestone): complete Phase 1A Admin Design System with 100% verified non-regression"
-```
+Run: `git tag admin-phase-1a-complete`

@@ -35,7 +35,7 @@ To ensure the design system remains brand-agnostic and easily maintainable, comp
 
     /* Brand Primary (Katteyes Luxury Amber Canonical #D97706) */
     --primary: 32 95% 44%;
-    --primary-foreground: 0 0% 100%;
+    --primary-foreground: 222 47% 11%;   /* Near-black text satisfies WCAG AA > 7:1 contrast */
 
     /* Secondary & Muted */
     --secondary: 210 40% 96.1%;
@@ -61,7 +61,7 @@ To ensure the design system remains brand-agnostic and easily maintainable, comp
     --sidebar-background: 0 0% 100%;
     --sidebar-foreground: 222 47% 11%;
     --sidebar-primary: 32 95% 44%;
-    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-primary-foreground: 222 47% 11%;
     --sidebar-accent: 210 40% 96.1%;
     --sidebar-accent-foreground: 222 47% 11.2%;
     --sidebar-border: 214.3 31.8% 91.4%;
