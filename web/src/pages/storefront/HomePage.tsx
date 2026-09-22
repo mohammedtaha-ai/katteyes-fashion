@@ -32,8 +32,8 @@ function useDebounced<T>(value: T, ms = 300): T {
 
 export function HomePage() {
   const [searchParams, setSearchParams] = useSearchParams()
-  const [category, setCategory] = useState(searchParams.get('category') || '')
-  const [searchInput, setSearchInput] = useState('')
+  const category = searchParams.get('category') || ''
+  const searchInput = searchParams.get('q') || ''
   const [sortBy, setSortBy] = useState<SortOption>('newest')
 
   const isWishlistOnly = searchParams.get('wishlist') === '1'
@@ -49,16 +49,7 @@ export function HomePage() {
 
   const rawProducts = data?.data?.data ?? []
 
-  // Sync category state with query param if it changes
-  useEffect(() => {
-    const urlCat = searchParams.get('category') || ''
-    if (urlCat !== category) {
-      setCategory(urlCat)
-    }
-  }, [searchParams])
-
   const handleCategorySelect = (slug: string) => {
-    setCategory(slug)
     const nextParams = new URLSearchParams(searchParams)
     if (slug) {
       nextParams.set('category', slug)
@@ -75,6 +66,12 @@ export function HomePage() {
     } else {
       nextParams.set('wishlist', '1')
     }
+    setSearchParams(nextParams, { replace: true })
+  }
+
+  const clearSearch = () => {
+    const nextParams = new URLSearchParams(searchParams)
+    nextParams.delete('q')
     setSearchParams(nextParams, { replace: true })
   }
 
@@ -102,100 +99,7 @@ export function HomePage() {
 
   return (
     <div className="min-h-screen bg-brand-light pb-16">
-      {/* 1. Luxury Hero Promo Slider */}
-      <ErrorBoundary>
-        <HeroPromoSlider />
-      </ErrorBoundary>
-
-      {/* 2. Interactive Search & Filter Toolbar */}
-      <div className="sticky top-16 z-30 bg-white/95 backdrop-blur-md border-b border-zinc-200/80 shadow-xs px-4 py-3">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
-          {/* Search Input */}
-          <div className="w-full sm:flex-1 relative">
-            <Search
-              size={18}
-              className="absolute top-1/2 -translate-y-1/2 start-3.5 text-zinc-400 pointer-events-none"
-            />
-            <input
-              type="search"
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              placeholder="ابحثي عن فستان سهرة، عباية، حذاء، حقيبة..."
-              data-testid="search-input"
-              className="w-full h-11 ps-10 pe-10 rounded-full bg-zinc-100 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-brand-accent transition text-zinc-900 placeholder:text-zinc-400 border border-transparent focus:border-brand-accent focus:bg-white"
-            />
-            {searchInput && (
-              <button
-                type="button"
-                onClick={() => setSearchInput('')}
-                className="absolute top-1/2 -translate-y-1/2 end-3.5 text-zinc-400 hover:text-zinc-700"
-                aria-label="مسح البحث"
-              >
-                <X size={16} />
-              </button>
-            )}
-          </div>
-
-          {/* Filter Controls: Sorting & Wishlist Toggle */}
-          <div className="w-full sm:w-auto flex items-center justify-between sm:justify-end gap-2 shrink-0">
-            {/* Wishlist filter toggle button */}
-            <button
-              type="button"
-              onClick={toggleWishlistFilter}
-              data-testid="wishlist-filter-toggle"
-              className={`h-11 px-4 rounded-full text-xs font-bold flex items-center gap-1.5 transition-all duration-200 cursor-pointer border ${
-                isWishlistOnly
-                  ? 'bg-rose-50 border-rose-300 text-rose-600 shadow-xs'
-                  : 'bg-zinc-100 border-zinc-200 text-zinc-700 hover:bg-zinc-200'
-              }`}
-            >
-              <Heart
-                size={16}
-                className={
-                  isWishlistOnly
-                    ? 'text-rose-600 fill-rose-600'
-                    : wishlistCount > 0
-                    ? 'text-rose-500 fill-rose-500'
-                    : ''
-                }
-              />
-              <span>المفضلة</span>
-              {wishlistCount > 0 && (
-                <span
-                  className={`px-1.5 py-0.5 rounded-full text-[10px] font-black ${
-                    isWishlistOnly
-                      ? 'bg-rose-600 text-white'
-                      : 'bg-zinc-200 text-zinc-800'
-                  }`}
-                >
-                  {wishlistCount}
-                </span>
-              )}
-            </button>
-
-            {/* Sort Select */}
-            <div className="relative flex items-center">
-              <ArrowUpDown
-                size={14}
-                className="absolute start-3 pointer-events-none text-zinc-400"
-              />
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as SortOption)}
-                aria-label="ترتيب المنتجات"
-                data-testid="sort-select"
-                className="h-11 ps-8 pe-4 rounded-full bg-zinc-100 border border-zinc-200 text-xs font-bold text-zinc-800 focus:outline-none focus:ring-2 focus:ring-brand-accent cursor-pointer appearance-none transition"
-              >
-                <option value="newest">وصل حديثاً (الأحدث)</option>
-                <option value="price_asc">السعر: من الأقل للأعلى</option>
-                <option value="price_desc">السعر: من الأعلى للأقل</option>
-              </select>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* 3. Instagram Story-styled Category Bar */}
+      {/* 1. Category Stories Bar (Positioned directly under Header as Sub-header) */}
       <ErrorBoundary>
         <CategoryStoryBar
           activeCategory={category}
@@ -203,18 +107,23 @@ export function HomePage() {
         />
       </ErrorBoundary>
 
-      {/* 4. Limited Time Flash Deals Section (Shown when browsing all products and there are enough products) */}
+      {/* 2. Luxury Hero Promo Slider */}
+      <ErrorBoundary>
+        <HeroPromoSlider />
+      </ErrorBoundary>
+
+      {/* 3. Limited Time Flash Deals Section (Shown when browsing all products without active filters) */}
       {!isWishlistOnly && !searchInput && !category && rawProducts.length >= 3 && (
         <ErrorBoundary>
           <FlashDealsSection products={rawProducts} />
         </ErrorBoundary>
       )}
 
-      {/* 5. Main Products Catalog */}
+      {/* 4. Main Products Catalog */}
       <main className="max-w-7xl mx-auto px-4 py-8" id="products">
-        {/* Section Header with Product Count & Filter Tags */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 pb-4 border-b border-zinc-200/80">
-          <div className="flex items-center gap-2">
+        {/* Section Header with Product Count, Active Filters, Sort & Wishlist Controls */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 pb-4 border-b border-zinc-200/80">
+          <div className="flex items-center gap-3">
             <h2 className="text-xl sm:text-2xl font-black text-slate-900 flex items-center gap-2">
               {isWishlistOnly ? (
                 <>
@@ -246,47 +155,104 @@ export function HomePage() {
             </span>
           </div>
 
-          {/* Active Filter Chips */}
-          {(category || isWishlistOnly || searchInput) && (
-            <div className="flex items-center gap-2 flex-wrap">
-              {isWishlistOnly && (
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-100 text-rose-700 text-xs font-bold">
-                  <span>المفضلة فقط</span>
-                  <button
-                    type="button"
-                    onClick={toggleWishlistFilter}
-                    className="hover:text-rose-900 cursor-pointer"
-                  >
-                    <X size={14} />
-                  </button>
+          {/* Controls: Sorting, Wishlist toggle & Active filter chips */}
+          <div className="flex items-center gap-2.5 flex-wrap sm:flex-nowrap justify-start md:justify-end">
+            {/* Active Filter Chips */}
+            {(category || isWishlistOnly || searchInput) && (
+              <div className="flex items-center gap-1.5 flex-wrap">
+                {isWishlistOnly && (
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-100 text-rose-700 text-xs font-bold">
+                    <span>المفضلة فقط</span>
+                    <button
+                      type="button"
+                      onClick={toggleWishlistFilter}
+                      className="hover:text-rose-900 cursor-pointer"
+                    >
+                      <X size={14} />
+                    </button>
+                  </span>
+                )}
+                {category && (
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-bold">
+                    <span>القسم: {category}</span>
+                    <button
+                      type="button"
+                      onClick={() => handleCategorySelect('')}
+                      className="hover:text-amber-950 cursor-pointer"
+                    >
+                      <X size={14} />
+                    </button>
+                  </span>
+                )}
+                {searchInput && (
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-200 text-zinc-800 text-xs font-bold">
+                    <span>البحث: {searchInput}</span>
+                    <button
+                      type="button"
+                      onClick={clearSearch}
+                      className="hover:text-black cursor-pointer"
+                    >
+                      <X size={14} />
+                    </button>
+                  </span>
+                )}
+              </div>
+            )}
+
+            {/* Wishlist filter toggle button */}
+            <button
+              type="button"
+              onClick={toggleWishlistFilter}
+              data-testid="wishlist-filter-toggle"
+              className={`h-10 px-4 rounded-full text-xs font-bold flex items-center gap-1.5 transition-all duration-200 cursor-pointer border shrink-0 ${
+                isWishlistOnly
+                  ? 'bg-rose-50 border-rose-300 text-rose-600 shadow-xs'
+                  : 'bg-white border-zinc-200 text-zinc-700 hover:bg-zinc-50'
+              }`}
+            >
+              <Heart
+                size={16}
+                className={
+                  isWishlistOnly
+                    ? 'text-rose-600 fill-rose-600'
+                    : wishlistCount > 0
+                    ? 'text-rose-500 fill-rose-500'
+                    : ''
+                }
+              />
+              <span>المفضلة</span>
+              {wishlistCount > 0 && (
+                <span
+                  className={`px-1.5 py-0.5 rounded-full text-[10px] font-black ${
+                    isWishlistOnly
+                      ? 'bg-rose-600 text-white'
+                      : 'bg-zinc-200 text-zinc-800'
+                  }`}
+                >
+                  {wishlistCount}
                 </span>
               )}
-              {category && (
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-bold">
-                  <span>القسم: {category}</span>
-                  <button
-                    type="button"
-                    onClick={() => handleCategorySelect('')}
-                    className="hover:text-amber-950 cursor-pointer"
-                  >
-                    <X size={14} />
-                  </button>
-                </span>
-              )}
-              {searchInput && (
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-200 text-zinc-800 text-xs font-bold">
-                  <span>البحث: {searchInput}</span>
-                  <button
-                    type="button"
-                    onClick={() => setSearchInput('')}
-                    className="hover:text-black cursor-pointer"
-                  >
-                    <X size={14} />
-                  </button>
-                </span>
-              )}
+            </button>
+
+            {/* Sort Select Dropdown */}
+            <div className="relative flex items-center shrink-0">
+              <ArrowUpDown
+                size={14}
+                className="absolute start-3 pointer-events-none text-zinc-400"
+              />
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as SortOption)}
+                aria-label="ترتيب المنتجات"
+                data-testid="sort-select"
+                className="h-10 ps-8 pe-4 rounded-full bg-white border border-zinc-200 text-xs font-bold text-zinc-800 focus:outline-none focus:ring-2 focus:ring-brand-accent cursor-pointer appearance-none transition shadow-xs"
+              >
+                <option value="newest">وصل حديثاً (الأحدث)</option>
+                <option value="price_asc">السعر: من الأقل للأعلى</option>
+                <option value="price_desc">السعر: من الأعلى للأقل</option>
+              </select>
             </div>
-          )}
+          </div>
         </div>
 
         {/* Product Grid / Empty State */}
@@ -345,12 +311,12 @@ export function HomePage() {
         )}
       </main>
 
-      {/* 6. Brand Trust & Value Proposition Features */}
+      {/* 5. Brand Trust & Value Proposition Features */}
       <ErrorBoundary>
         <BrandTrustFeatures />
       </ErrorBoundary>
 
-      {/* 7. VIP Club Newsletter Signup Banner */}
+      {/* 6. VIP Club Newsletter Signup Banner */}
       <ErrorBoundary>
         <NewsletterSignup />
       </ErrorBoundary>

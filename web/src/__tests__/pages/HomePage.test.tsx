@@ -8,6 +8,8 @@ import { useCartStore } from '@/stores/cart-store'
 import { useToastStore } from '@/stores/toast-store'
 import { useWishlistStore } from '@/stores/wishlist-store'
 
+import { Header } from '@/components/layout/Header'
+
 function makeWrapper() {
   const qc = new QueryClient({
     defaultOptions: { queries: { retry: false } },
@@ -20,6 +22,7 @@ function makeWrapper() {
 function wrap(initialEntries = ['/']) {
   return render(
     <MemoryRouter initialEntries={initialEntries}>
+      <Header />
       <HomePage />
     </MemoryRouter>,
     { wrapper: makeWrapper() },

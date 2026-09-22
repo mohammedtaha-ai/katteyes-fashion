@@ -4,9 +4,6 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Cache\RateLimiting\Limit;
 
-RateLimiter::for('auth', function ($request) {
-    return Limit::perMinute(60)->by($request->ip());
-});
 
 Route::middleware('throttle:auth')->group(function () {
     // public, rate-limited (spec §5.8)

@@ -27,8 +27,8 @@ export function LoginPage() {
   // Quick Demo credentials helper for testing
   const handleQuickFill = (role: 'admin' | 'customer') => {
     if (role === 'admin') {
-      setEmail('admin@katteyes.com')
-      setPassword('password1234')
+      setEmail('admin@katteyes.test')
+      setPassword('password')
     } else {
       setEmail('reem@katteyes.com')
       setPassword('password1234')
