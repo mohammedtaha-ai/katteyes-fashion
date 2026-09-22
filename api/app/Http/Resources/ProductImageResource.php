@@ -11,9 +11,13 @@ class ProductImageResource extends JsonResource
     {
         $disk = $this->resource->product?->disk ?? config('filesystems.default');
 
+        $url = (str_starts_with($this->path, 'http://') || str_starts_with($this->path, 'https://'))
+            ? $this->path
+            : Storage::disk($disk)->url($this->path);
+
         return [
             'id'         => $this->id,
-            'url'        => Storage::disk($disk)->url($this->path),
+            'url'        => $url,
             'sort_order' => (int) $this->sort_order,
         ];
     }
