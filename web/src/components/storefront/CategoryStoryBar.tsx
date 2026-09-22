@@ -99,6 +99,7 @@ export function CategoryStoryBar({
 
   return (
     <div
+      id="categories-bar"
       data-testid="category-story-bar"
       className="w-full bg-white border-b border-zinc-100 py-3.5 px-4 shadow-xs"
     >

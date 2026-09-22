@@ -102,14 +102,23 @@ export function ProductDetailPage() {
       })
     }
 
-    // Trigger luxury confetti animation
+    // Trigger luxury confetti animation if supported
     try {
-      confetti({
-        particleCount: 50,
-        spread: 60,
-        origin: { y: 0.8 },
-        colors: ['#e5a83b', '#0f172a', '#d97706', '#f59e0b'],
-      })
+      if (
+        typeof window !== 'undefined' &&
+        import.meta.env.MODE !== 'test' &&
+        typeof document?.createElement === 'function'
+      ) {
+        const testCanvas = document.createElement('canvas')
+        if (testCanvas.getContext && testCanvas.getContext('2d')) {
+          confetti({
+            particleCount: 50,
+            spread: 60,
+            origin: { y: 0.8 },
+            colors: ['#e5a83b', '#0f172a', '#d97706', '#f59e0b'],
+          })
+        }
+      }
     } catch {
       // Confetti fallback
     }

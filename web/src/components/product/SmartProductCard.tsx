@@ -89,7 +89,11 @@ export function SmartProductCard({ product }: { product: Product }) {
     })
 
     try {
-      if (typeof window !== 'undefined' && typeof document?.createElement === 'function') {
+      if (
+        typeof window !== 'undefined' &&
+        import.meta.env.MODE !== 'test' &&
+        typeof document?.createElement === 'function'
+      ) {
         const testCanvas = document.createElement('canvas')
         if (testCanvas.getContext && testCanvas.getContext('2d')) {
           confetti({
