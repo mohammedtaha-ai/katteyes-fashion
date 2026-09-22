@@ -17,7 +17,9 @@ Phase 1 is divided into three sequential milestones:
 ### 2.1 Semantic Design Tokens (CSS Variables)
 To ensure the design system remains brand-agnostic and easily maintainable, components MUST NOT hardcode color names (e.g. `amber-600` or `zinc-900`) directly. Instead, all components consume semantic tokens configured as CSS variables in `src/index.css` and extended in `tailwind.config.js`.
 
-The Katteyes brand identity (Luxury Amber/Gold) is assigned to the `--primary` semantic token.
+**Brand Primary Canonical Definition:**
+- Canonical Hex: `#D97706` (Luxury Amber/Gold)
+- Canonical HSL: `32 95% 44%`
 
 ```css
 /* src/index.css */
@@ -31,8 +33,8 @@ The Katteyes brand identity (Luxury Amber/Gold) is assigned to the `--primary` s
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
 
-    /* Brand Primary (Katteyes Luxury Amber/Gold) */
-    --primary: 38 92% 50%;               /* #E5A83B / #D97706 */
+    /* Brand Primary (Katteyes Luxury Amber Canonical #D97706) */
+    --primary: 32 95% 44%;
     --primary-foreground: 0 0% 100%;
 
     /* Secondary & Muted */
@@ -43,20 +45,32 @@ The Katteyes brand identity (Luxury Amber/Gold) is assigned to the `--primary` s
     --accent: 38 92% 95%;
     --accent-foreground: 38 92% 35%;
 
-    /* Status Indicators */
+    /* Destructive (Standard shadcn convention for hazardous actions) */
+    --destructive: 0 84.2% 60.2%;        /* Rose 500 */
+    --destructive-foreground: 0 0% 98%;
+
+    /* Status Semantics (for Badges, Alerts & Data Indicators) */
     --success: 142 71% 45%;              /* Emerald 600 */
     --success-foreground: 0 0% 100%;
     --warning: 38 92% 50%;               /* Amber 500 */
     --warning-foreground: 0 0% 100%;
-    --danger: 0 84.2% 60.2%;             /* Rose 500 */
-    --danger-foreground: 0 0% 100%;
     --info: 199 89% 48%;                 /* Sky 500 */
     --info-foreground: 0 0% 100%;
+
+    /* Dedicated Sidebar Tokens (isolated customization for Phase 1B) */
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 222 47% 11%;
+    --sidebar-primary: 32 95% 44%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 210 40% 96.1%;
+    --sidebar-accent-foreground: 222 47% 11.2%;
+    --sidebar-border: 214.3 31.8% 91.4%;
+    --sidebar-ring: 32 95% 44%;
 
     /* Borders & Inputs */
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 38 92% 50%;
+    --ring: 32 95% 44%;
 
     /* Geometry */
     --radius: 1rem;                     /* 16px default card radius */
@@ -99,8 +113,8 @@ The foundational UI primitives in `web/src/components/ui/` will be generated/sta
    - `ScrollArea` (custom smooth scrolling for sidebars and tables)
    - `Breadcrumb` (`BreadcrumbList`, `BreadcrumbItem`, `BreadcrumbLink`, `BreadcrumbPage`, `BreadcrumbSeparator`)
 2. **Interactive Controls:**
-   - `Button` (semantic variants: `default` [primary], `secondary`, `outline`, `ghost`, `destructive`, `link`)
-   - `Badge` (variants: `default`, `secondary`, `outline`, `success`, `warning`, `danger`, `info`)
+   - `Button` (semantic variants: `default` [primary], `destructive`, `outline`, `secondary`, `ghost`, `link`)
+   - `Badge` (variants: `default`, `secondary`, `destructive`, `outline`, `success`, `warning`, `info`)
    - `Input` & `Label` (form controls with clean focus rings and RTL text alignment)
    - `Select` (accessible dropdown selection via Radix Select)
    - `Tabs` (`TabsList`, `TabsTrigger`, `TabsContent` for section switching)
@@ -117,10 +131,22 @@ The foundational UI primitives in `web/src/components/ui/` will be generated/sta
 
 *(Note: Generalized DataTable abstraction with TanStack Table is deliberately deferred to the Orders & Products phase where concrete data requirements exist).*
 
-### 2.4 RTL & Responsive Standards
+### 2.4 RTL & Directional Icon Rules
 - Full support for `dir="rtl"` using standard logical utilities (`start`, `end`, `ms-`, `me-`).
-- Icon rotation / directional mirroring for navigation arrows and chevrons.
-- Strict responsive breakpoints (`sm: 640px`, `md: 768px`, `lg: 1024px`, `xl: 1280px`).
+- **Icon Mirroring Precision:**
+  - **Directional Icons ONLY** (`ChevronLeft`, `ChevronRight`, `ArrowLeft`, `ArrowRight`, `PanelLeft`, `PanelRight`) receive directional mirroring (e.g. `rtl:rotate-180` or directional logic).
+  - **Content & Action Icons** (`Trash2`, `Search`, `Settings`, `ShoppingCart`, `User`, `Plus`, `Edit`, `Eye`, `LogOut`, etc.) maintain static orientation and are NEVER rotated.
+
+### 2.5 Accessibility Baseline (A11y)
+All UI primitives in Phase 1A must strictly adhere to the following accessibility requirements:
+- **Keyboard Navigation:** Full interactive support via Tab, Enter, Space, and Arrow keys.
+- **Visible Focus States:** Explicit focus rings using `focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2`.
+- **Icon-Only Accessible Controls:** All buttons lacking visible text must provide an explicit `aria-label` or `aria-labelledby`.
+- **Color Contrast:** Text and semantic states must satisfy WCAG 2.1 AA standards (minimum 4.5:1 for body text, 3:1 for large text and UI components).
+- **Overlay Focus Trapping:** `Dialog` and `Sheet` must trap focus while open and restore focus upon dismissal.
+- **Dismissibility:** All overlays must dismiss cleanly via the `Escape` key and backdrop click.
+- **Form Association:** Inputs must be programmatically connected to `<Label>` components via corresponding `id` and `htmlFor`.
+- **Non-Color State Indicators:** Statuses and alerts must never depend on color alone; badges and alerts must include explicit text labels or semantic iconography.
 
 ---
 
@@ -157,6 +183,6 @@ The foundational UI primitives in `web/src/components/ui/` will be generated/sta
 ## 5. Non-Regression & Verification Strategy
 1. **Isolation Guarantee:** Phase 1A strictly introduces tokens, `components.json`, and atomic UI components in `src/components/ui/`. No existing storefront or admin page logic is modified in 1A.
 2. **Automated Verification:**
-   - `npm run lint` (zero lint errors)
+   - `npm run lint` (zero lint errors via oxlint)
    - `npm run test` (all existing Vitest test suites must pass)
-   - `npm run build` (successful TypeScript compilation and Vite bundling)
+   - `npm run build` (runs `tsc -b && vite build` which guarantees strict TypeScript type checking and production bundling)
