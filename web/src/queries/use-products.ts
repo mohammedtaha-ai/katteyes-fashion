@@ -13,7 +13,8 @@ export const productKeys = {
 export const adminProductKeys = {
   all: ['admin-products'] as const,
   lists: () => [...adminProductKeys.all, 'list'] as const,
-  list: (filters: Record<string, unknown>) => [...adminProductKeys.lists(), filters] as const,
+  list: (filters?: Record<string, unknown> | UseAdminProductsFilters) =>
+    [...adminProductKeys.lists(), filters] as const,
   details: () => [...adminProductKeys.all, 'detail'] as const,
   detail: (id: number) => [...adminProductKeys.details(), id] as const,
 }
