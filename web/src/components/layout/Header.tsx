@@ -1,11 +1,13 @@
 import { useNavigate } from 'react-router-dom'
-import { ShoppingBag, Settings } from 'lucide-react'
+import { ShoppingBag, Settings, Heart } from 'lucide-react'
 import { useAuthStore } from '@/stores/auth-store'
 import { useCartStore } from '@/stores/cart-store'
+import { useWishlistStore } from '@/stores/wishlist-store'
 
 export function Header() {
   const navigate = useNavigate()
   const count = useCartStore((s) => s.totalItems())
+  const wishlistCount = useWishlistStore((s) => s.count())
   const user = useAuthStore((s) => s.user)
   const isAuthenticated = useAuthStore((s) => !!s.token)
 
@@ -57,6 +59,21 @@ export function Header() {
               دخول
             </button>
           )}
+
+          <button
+            onClick={() => navigate('/?wishlist=1')}
+            className="relative p-1.5 rounded-lg text-zinc-700 hover:text-brand hover:bg-brand-surface transition-colors"
+            title="المفضلة"
+            aria-label="المفضلة"
+            data-testid="wishlist-header-btn"
+          >
+            <Heart size={20} className={wishlistCount > 0 ? "text-rose-500 fill-rose-500" : ""} />
+            {wishlistCount > 0 && (
+              <span className="absolute -top-1 -end-1 bg-rose-500 text-white text-xs font-bold min-w-5 h-5 px-1 flex items-center justify-center rounded-full shadow-sm">
+                {wishlistCount}
+              </span>
+            )}
+          </button>
 
           <button
             onClick={() => navigate('/cart')}
