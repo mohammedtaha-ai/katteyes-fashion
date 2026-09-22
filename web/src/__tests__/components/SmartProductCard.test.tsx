@@ -4,6 +4,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { SmartProductCard } from '@/components/product/SmartProductCard'
 import { useCartStore } from '@/stores/cart-store'
 import { useToastStore } from '@/stores/toast-store'
+import { useWishlistStore } from '@/stores/wishlist-store'
 import type { Product } from '@/api/types'
 import { formatCurrency } from '@/lib/utils'
 
@@ -38,6 +39,7 @@ describe('SmartProductCard', () => {
   beforeEach(() => {
     useCartStore.getState().clear()
     useToastStore.getState().clearToasts()
+    useWishlistStore.getState().clear()
     mockNavigate.mockClear()
   })
 
@@ -177,7 +179,18 @@ describe('SmartProductCard', () => {
         <SmartProductCard product={futureProduct} />
       </MemoryRouter>,
     )
-
     expect(screen.queryByTestId('badge-new')).not.toBeInTheDocument()
+  })
+
+  it('toggles wishlist status when card wishlist button is clicked', () => {
+    render(
+      <MemoryRouter>
+        <SmartProductCard product={sampleProduct} />
+      </MemoryRouter>,
+    )
+
+    const wishlistBtn = screen.getByTestId('card-wishlist-btn')
+    fireEvent.click(wishlistBtn)
+    expect(useWishlistStore.getState().isWishlisted(101)).toBe(true)
   })
 })
