@@ -1,0 +1,135 @@
+# Owns shopping cart state, persistence, quantity management, and subtotal calculation.
+#
+# Cart items are persisted to localStorage under 'katteyes_cart' via Zustand's persist
+# middleware. Items are uniquely differentiated by composite key:
+# (productId, color, size).
+#
+# Updating quantity to 0 or below automatically purges the item from the list.
+# updateQty safely no-ops on out-of-bounds index to prevent runtime crashes.
+
+name: cart-store
+version: 1
+status: current
+source: web/src/stores/cart-store.ts
+
+shapes:
+  CartItem:
+    productId: int
+    productName: string
+    price: float
+    currency: string
+    img: string
+    color: string
+    size: string
+    quantity: int
+  CartState:
+    items: "[CartItem]"
+    addItem: "(i: Omit<CartItem, 'quantity'>) -> void"
+    updateQty: "(idx: int, delta: int) -> void"
+    removeItem: "(idx: int) -> void"
+    clear: "() -> void"
+    totalPrice: "() -> float"
+    totalItems: "() -> int"
+
+functions:
+  reads:
+    totalPrice:
+      signature: "() -> float"
+      notes: "Sum of (item.price * item.quantity) across all items."
+    totalItems:
+      signature: "() -> int"
+      notes: "Sum of item.quantity across all items."
+
+  writes:
+    addItem:
+      signature: "(item) -> void"
+      notes: "Appends new item or increments existing item quantity matching (productId, color, size)."
+    updateQty:
+      signature: "(idx: int, delta: int) -> void"
+      notes: >
+        Adjusts quantity at idx by delta. If quantity <= 0, deletes item. Safely
+        no-ops if idx is out of bounds (negative or >= items.length).
+    removeItem:
+      signature: "(idx: int) -> void"
+      notes: "Removes item at given array index. Safe to call on out-of-bounds index."
+    clear:
+      signature: "() -> void"
+      notes: "Empties items array."
+
+obligations:
+  - rule: >
+      addItem increments quantity for matching product, color, and size rather than
+      creating duplicate entries.
+    tested_by: "addItem increments quantity for same product+color+size"
+
+  - rule: >
+      addItem creates a new line item when color or size differs.
+    tested_by: "addItem adds separate line for different size"
+
+  - rule: >
+      updateQty increments item quantity and removes item when quantity reaches 0 or below.
+    tested_by: "updateQty increments then removes at 0"
+
+  - rule: >
+      totalPrice and totalItems compute accurate aggregates across items.
+    tested_by: "totalPrice + totalItems computed correctly"
+
+  - rule: >
+      updateQty safely no-ops on out-of-bounds index on an empty cart without throwing.
+    tested_by: "updateQty gracefully ignores out-of-bounds index on empty cart without throwing"
+
+  - rule: >
+      updateQty on out-of-bounds index in a non-empty cart must not delete or modify a
+      real item at a different valid index.
+    tested_by: "updateQty on out-of-bounds index does not delete a real item in a non-empty cart"
+
+  - rule: >
+      clear removes all items.
+    tested_by: "clear removes all items"
+
+forbidden_caller_actions:
+  - >
+      Mutate item quantity or perform cart deduplication outside useCartStore; callers
+      must pass actions through addItem or updateQty.
+
+gaps:
+  - at: updateQty
+    gap: >
+      Access by numerical array index (idx) rather than stable composite key is sensitive
+      to array reordering. Out-of-bounds crash resolved with guard check, but composite
+      key API migration is deferred to future refactoring.
+
+open_questions:
+  - >
+      What happens when a returning user has a persisted cart-store payload from a
+      previous schema (e.g. missing required field)? Tracked in Review Focus #1; if
+      found broken, add a test in this task.
+
+tests:
+  - name: "addItem adds new item with quantity 1"
+    checks: >
+      Adding a fresh item creates one entry with quantity 1.
+  - name: "addItem increments quantity for same product+color+size"
+    checks: >
+      Adding the same item twice increases quantity to 2 and keeps items.length at 1.
+  - name: "addItem adds separate line for different size"
+    checks: >
+      Adding the same product with different size produces two separate line items.
+  - name: "updateQty increments then removes at 0"
+    checks: >
+      Increasing quantity by delta updates quantity; decreasing to 0 splices the item.
+  - name: "removeItem removes specific line"
+    checks: >
+      removeItem(0) removes the first item and reindexes.
+  - name: "totalPrice + totalItems computed correctly"
+    checks: >
+      Calculates arithmetic product sum and quantity sum.
+  - name: "clear removes all items"
+    checks: >
+      clear() empties the items array.
+  - name: "updateQty gracefully ignores out-of-bounds index on empty cart without throwing"
+    checks: >
+      Passing invalid indices (999, -1) on an empty cart cleanly no-ops without throwing.
+  - name: "updateQty on out-of-bounds index does not delete a real item in a non-empty cart"
+    checks: >
+      Out-of-bounds index does not modify or delete a real item at a different valid index.

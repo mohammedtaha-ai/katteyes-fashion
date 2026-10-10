@@ -43,6 +43,7 @@ export const useCartStore = create<CartState>()(
         }),
       updateQty: (idx, delta) =>
         set((s) => {
+          if (!s.items[idx]) return s
           const items = [...s.items]
           items[idx] = { ...items[idx], quantity: items[idx].quantity + delta }
           if (items[idx].quantity <= 0) items.splice(idx, 1)

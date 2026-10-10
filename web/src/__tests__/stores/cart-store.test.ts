@@ -63,3 +63,25 @@ it('clear removes all items', () => {
   useCartStore.getState().clear()
   expect(useCartStore.getState().items).toHaveLength(0)
 })
+
+it('updateQty gracefully ignores out-of-bounds index on empty cart without throwing', () => {
+  expect(() => {
+    useCartStore.getState().updateQty(999, 1)
+    useCartStore.getState().updateQty(-1, -1)
+  }).not.toThrow()
+  expect(useCartStore.getState().items).toEqual([])
+})
+
+it('updateQty on out-of-bounds index does not delete a real item in a non-empty cart', () => {
+  useCartStore.getState().addItem(sampleItem)
+  expect(useCartStore.getState().items).toHaveLength(1)
+
+  expect(() => {
+    useCartStore.getState().updateQty(999, -1)
+    useCartStore.getState().updateQty(-1, -1)
+  }).not.toThrow()
+
+  // The real item at index 0 must still be there, untouched.
+  expect(useCartStore.getState().items).toHaveLength(1)
+  expect(useCartStore.getState().items[0].productId).toBe(1)
+})
