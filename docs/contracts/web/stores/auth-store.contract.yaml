@@ -1,0 +1,95 @@
+# Owns client-side authentication session state, token persistence, and role checks.
+#
+# Authentication state is persisted across page refreshes via Zustand's persist
+# middleware in localStorage under the key 'katteyes_auth'.
+#
+# isAdmin() strictly evaluates whether user.role equals 'admin'. It does not verify
+# token cryptographical validity or expiration timestamp; expiration is handled
+# reactively by apiClient's 401 response interceptor (see api/client.contract.yaml).
+
+name: auth-store
+version: 1
+status: current
+source: web/src/stores/auth-store.ts
+
+shapes:
+  AuthState:
+    user: "User | null"
+    token: "string | null"
+    isAdmin: "() -> bool"
+    isAuthenticated: "() -> bool"
+    setAuth: "({ token: string, user: User }) -> void"
+    clear: "() -> void"
+  User:
+    ref: "@/api/types#User"
+
+functions:
+  reads:
+    isAdmin:
+      signature: "() -> bool"
+      notes: "Returns true strictly when user is non-null and user.role is 'admin'."
+    isAuthenticated:
+      signature: "() -> bool"
+      notes: "Returns true if token is non-null and non-empty. Does NOT validate token expiration."
+
+  writes:
+    setAuth:
+      signature: "({ token: string, user: User }) -> void"
+      notes: "Sets both token and user simultaneously into state and localStorage."
+    clear:
+      signature: "() -> void"
+      notes: "Resets token and user to null, clearing authenticated status. Safe to call on stale state."
+
+obligations:
+  - rule: >
+      Calling setAuth stores token and user in state and persists them, causing
+      isAuthenticated to return true.
+    tested_by: "setAuth stores token + user"
+
+  - rule: >
+      Calling clear sets token and user to null, causing isAuthenticated to return false.
+    tested_by: "clear removes token + user"
+
+  - rule: >
+      isAdmin returns true strictly when user role is 'admin'.
+    tested_by: "isAdmin returns true for admin role"
+
+  - rule: >
+      isAdmin returns false when user role is 'customer'.
+    tested_by: "isAdmin returns false for customer role"
+
+  - rule: >
+      isAdmin returns false when user is null.
+    tested_by: "isAdmin returns false when user is null"
+
+forbidden_caller_actions:
+  - >
+      Inspect raw user.role strings directly in pages or components; callers must use
+      isAdmin() or the RequireAuth wrapper at @/components/auth/RequireAuth.
+  - >
+      Clear localStorage['katteyes_auth'] manually; use clear() so the in-memory state
+      and persisted state stay in sync.
+
+open_questions:
+  - >
+      What happens when a returning user has a persisted auth-store payload from a
+      previous schema (e.g. user.role missing or token is an expired JWT)? Resolving
+      requires inspecting whether the persist middleware validates on rehydrate.
+      Tracked in Review Focus #1; if found broken, add a test in this task.
+
+tests:
+  - name: "setAuth stores token + user"
+    checks: >
+      Calling setAuth sets token and isAuthenticated returns true.
+  - name: "clear removes token + user"
+    checks: >
+      Calling setAuth then clear sets token to null and isAuthenticated returns false.
+  - name: "isAdmin returns true for admin role"
+    checks: >
+      Returns true when user.role is 'admin'.
+  - name: "isAdmin returns false for customer role"
+    checks: >
+      Returns false when user.role is 'customer'.
+  - name: "isAdmin returns false when user is null"
+    checks: >
+      Returns false after clear() so user is null.

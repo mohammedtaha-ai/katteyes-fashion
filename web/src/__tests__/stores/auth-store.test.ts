@@ -39,3 +39,8 @@ it('isAdmin returns false for customer role', () => {
   })
   expect(useAuthStore.getState().isAdmin()).toBe(false)
 })
+
+it('isAdmin returns false when user is null', () => {
+  useAuthStore.getState().clear()
+  expect(useAuthStore.getState().isAdmin()).toBe(false)
+})
