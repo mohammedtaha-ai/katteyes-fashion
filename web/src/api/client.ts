@@ -10,12 +10,22 @@ apiClient.interceptors.request.use((config) => {
   const token = useAuthStore.getState().token
   if (token) config.headers.Authorization = `Bearer ${token}`
 
-  if (
-    config.data instanceof FormData &&
-    ['put', 'patch'].includes(config.method?.toLowerCase() ?? '')
-  ) {
-    config.data.append('_method', config.method!.toUpperCase())
-    config.method = 'post'
+  // Laravel parses multipart/form-data from POST reliably but not from PUT/PATCH.
+  // Rewrite FormData PUT/PATCH into POST with _method=PUT (or PATCH) appended
+  // so the server still sees the original intent. POST and DELETE pass through
+  // unchanged.
+  if (config.data instanceof FormData) {
+    const lower = (config.method ?? '').toLowerCase()
+    if (lower === 'put' || lower === 'patch') {
+      config.data.append('_method', config.method!.toUpperCase())
+      config.method = 'post'
+      // After method change, axios will not re-derive Content-Type from data.
+      // Drop the header so axios sets multipart/form-data with the correct boundary.
+      if (config.headers) {
+        delete (config.headers as Record<string, unknown>)['Content-Type']
+        delete (config.headers as Record<string, unknown>)['content-type']
+      }
+    }
   }
 
   return config

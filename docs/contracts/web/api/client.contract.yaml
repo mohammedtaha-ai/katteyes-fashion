@@ -1,0 +1,95 @@
+# Owns Axios HTTP client initialization, request and response interceptors, and 401 handling.
+#
+# Intercepts every outgoing request to:
+#   1. automatically inject Bearer token from auth-store
+#   2. rewrite FormData PUT/PATCH into POST with _method appended for Laravel
+#      multipart/form-data compatibility (POST and DELETE pass through unchanged)
+#
+# Intercepts every 401 response to clear auth-store and redirect to /login, except
+# for responses originating from /auth/login itself.
+
+name: api-client
+version: 1
+status: current
+source: web/src/api/client.ts
+
+shapes:
+  apiClient: "AxiosInstance"
+
+functions:
+  operations:
+    request_interceptor:
+      signature: "(config: InternalAxiosRequestConfig) -> InternalAxiosRequestConfig"
+      notes: >
+        Appends Bearer token from auth-store when present. Rewrites FormData
+        PUT/PATCH to POST with _method=PUT or _method=PATCH appended. POST and
+        DELETE FormData pass through unchanged. Other content types pass through.
+        After method rewrite, Content-Type header is dropped so axios re-derives
+        multipart/form-data with the correct boundary.
+    response_error_interceptor:
+      signature: "(err: AxiosError) -> Promise<never>"
+      notes: >
+        On 401, clears auth-store and triggers navigation to /login unless the
+        request URL contains /auth/login.
+
+obligations:
+  - rule: >
+      Automatically attaches Authorization: Bearer <token> header to requests when token
+      exists in auth-store.
+    tested_by: "attaches Bearer token from auth-store"
+
+  - rule: >
+      Rewrites PUT requests containing FormData into POST requests with _method: PUT
+      appended so Laravel parses multipart/form-data correctly.
+    tested_by: "rewrites FormData PUT requests to POST with _method append"
+
+  - rule: >
+      Rewrites PATCH requests containing FormData into POST with _method: PATCH appended.
+    tested_by: "rewrites FormData PUT requests to POST with _method append"
+
+  - rule: >
+      Does NOT rewrite FormData on POST or DELETE methods; they pass through unchanged.
+    tested_by: "does NOT rewrite FormData POST or DELETE requests"
+
+  - rule: >
+      Clears auth-store on 401 responses and triggers navigation to /login for protected
+      endpoints.
+    tested_by: "clears auth-store on 401 and redirects to /login"
+
+  - rule: >
+      Does not trigger navigation on 401 responses originating from /auth/login.
+    tested_by: "does NOT redirect on 401 from /auth/login"
+
+forbidden_caller_actions:
+  - >
+      Inject Bearer headers manually or implement custom 401 redirect listeners;
+      apiClient handles authorization and session termination centrally.
+
+gaps:
+  - at: response_error_interceptor
+    gap: >
+      On 401, calls useAuthStore.getState().clear() and window.location.assign('/login')
+      unconditionally. If multiple parallel requests 401 simultaneously, the first
+      triggers clear() and a redirect; subsequent calls are no-ops on clear() but
+      may still try to assign to window.location multiple times. Tracked in Review
+      Focus #2; current behavior is acceptable for v1 because clear() is idempotent
+      and reassigning window.location has no harmful side effect beyond extra history
+      entries.
+
+tests:
+  - name: "attaches Bearer token from auth-store"
+    checks: >
+      Outgoing request includes Bearer token matching current auth-store state.
+  - name: "rewrites FormData PUT requests to POST with _method append"
+    checks: >
+      apiClient.put('/upload', formData) results in an HTTP POST with form field _method=PUT.
+  - name: "does NOT rewrite FormData POST or DELETE requests"
+    checks: >
+      apiClient.post('/x', formData) sends HTTP POST; apiClient.delete('/x', {data: formData})
+      sends HTTP DELETE; both reach their respective handlers.
+  - name: "clears auth-store on 401 and redirects to /login"
+    checks: >
+      On 401 response, auth-store token is cleared and navigation to /login is initiated.
+  - name: "does NOT redirect on 401 from /auth/login"
+    checks: >
+      401 response from /auth/login does not trigger navigation.

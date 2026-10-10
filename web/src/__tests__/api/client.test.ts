@@ -98,4 +98,51 @@ describe('apiClient', () => {
 
     nav.restore()
   })
+
+  it('rewrites FormData PUT requests to POST with _method append', async () => {
+    let capturedMethod: string | null = null
+    let capturedMethodField: string | null = null
+
+    server.use(
+      http.post('*/api/v1/upload', async ({ request }) => {
+        capturedMethod = request.method
+        const formData = await request.formData()
+        capturedMethodField = formData.get('_method') as string
+        return HttpResponse.json({ data: { ok: true } })
+      }),
+    )
+
+    const form = new FormData()
+    form.append('name', 'dress')
+    await apiClient.put('/upload', form)
+
+    expect(capturedMethod).toBe('POST')
+    expect(capturedMethodField).toBe('PUT')
+  })
+
+  it('does NOT rewrite FormData POST or DELETE requests', async () => {
+    let postMethodSeen = false
+    let deleteMethodSeen = false
+    server.use(
+      http.post('*/api/v1/upload-post', () => {
+        postMethodSeen = true
+        return HttpResponse.json({ data: { ok: true } })
+      }),
+      http.delete('*/api/v1/upload-delete', () => {
+        deleteMethodSeen = true
+        return HttpResponse.json({ data: { ok: true } })
+      }),
+    )
+
+    const postForm = new FormData()
+    postForm.append('name', 'a')
+    await apiClient.post('/upload-post', postForm)
+
+    const deleteForm = new FormData()
+    deleteForm.append('name', 'b')
+    await apiClient.delete('/upload-delete', { data: deleteForm } as any)
+
+    expect(postMethodSeen).toBe(true)
+    expect(deleteMethodSeen).toBe(true)
+  })
 })
